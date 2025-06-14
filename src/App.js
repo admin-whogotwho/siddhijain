@@ -4,9 +4,10 @@
 // It includes three specialized calculators: TDS Calculator, GST Applicability Calculator, and Input Tax Credit Availment Calculator.
 // The "Search Case Laws" features in TDS and ITC calculators are simulated for demonstration purposes,
 // as real-world implementation requires robust backend integration with legal databases and advanced NLP/LLM capabilities.
-
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient'; // Import the configured Supabase client
+import { supabase } from './supabaseClient';
+// Import the configured Supabase client
+import { Helmet } from 'react-helmet-async';
 
 // --- Calculator Components ---
 
@@ -15,7 +16,8 @@ const TDSCalculator = () => {
   const [paymentNature, setPaymentNature] = useState('');
   const [amount, setAmount] = useState('');
   const [panAvailable, setPanAvailable] = useState('yes');
-  // 'resident' is a default; specific payment natures will change this to 'individual', 'huf', 'senior_citizen', 'non-resident'
+  // 'resident' is a default;
+  // specific payment natures will change this to 'individual', 'huf', 'senior_citizen', 'non-resident'
   const [residentStatus, setResidentStatus] = useState('resident');
   const [tdsResult, setTdsResult] = useState(null);
   const [caseLawQuery, setCaseLawQuery] = useState('');
@@ -29,27 +31,34 @@ const TDSCalculator = () => {
     }
 
     let applicableSection = '';
-    let rate = 0; // Default numeric rate
-    let threshold = 0; // Default threshold
+    let rate = 0;
+    // Default numeric rate
+    let threshold = 0;
+    // Default threshold
     let isApplicable = false;
-    let tdsAmount = null; // Will be a number if calculable, otherwise null
+    let tdsAmount = null;
+    // Will be a number if calculable, otherwise null
     let remarks = '';
-    let rateDisplay = ''; // String to display rate (e.g., "10%", "As per tax slab")
+    let rateDisplay = '';
+    // String to display rate (e.g., "10%", "As per tax slab")
 
     // Implementing TDS Logic based on Income Tax Act 1961 for common scenarios
-    // NOTE: This is a highly simplified representation. Actual tax laws are complex
+    // NOTE: This is a highly simplified representation.
+    // Actual tax laws are complex
     // and include many nuances, specific thresholds, and exceptions.
     // PAN non-availability (Sec 206AA): Higher of (specified rate, 20%) applies if PAN not provided.
-
     switch (paymentNature) {
       case 'Salary':
         applicableSection = '192';
         threshold = 0; // Always applicable on taxable income
-        rateDisplay = panAvailable === 'yes' ? 'As per individual tax slab' : '20% (Max Marginal Rate)';
-        isApplicable = true; // Assumed taxable income is present
+        rateDisplay = panAvailable === 'yes' ?
+        'As per individual tax slab' : '20% (Max Marginal Rate)';
+        isApplicable = true;
+        // Assumed taxable income is present
         // TDS for salary is complex and depends on tax slabs, deductions etc.
         // Only provide a concrete amount if PAN is not available (20% flat rate or MMR)
-        tdsAmount = panAvailable === 'no' ? val * 0.20 : null;
+        tdsAmount = panAvailable === 'no' ?
+        val * 0.20 : null;
         remarks = 'TDS on salary depends on tax slab after considering all exemptions and deductions. Actual calculation requires detailed income and deduction information.';
         break;
       case 'Premature EPF Withdrawal':
@@ -73,9 +82,11 @@ const TDSCalculator = () => {
       case 'Interest (Other than Securities)':
         applicableSection = '194A';
         if (residentStatus === 'senior_citizen') {
-          threshold = 50000; // For banks, co-op, post offices for senior citizens
+          threshold = 50000;
+          // For banks, co-op, post offices for senior citizens
         } else if (residentStatus === 'individual' || residentStatus === 'huf' || residentStatus === 'other') {
-          threshold = 40000; // For banks, co-op, post offices for others
+          threshold = 40000;
+          // For banks, co-op, post offices for others
         }
         rate = 10;
         isApplicable = (val > threshold);
@@ -90,8 +101,10 @@ const TDSCalculator = () => {
         break;
       case 'Contract Payments':
         applicableSection = '194C';
-        threshold = 30000; // Single transaction; Aggregate 1,00,000 (complex for simple calculator)
-        rate = (residentStatus === 'individual' || residentStatus === 'huf') ? 1 : 2; // 1% for Ind/HUF, 2% for others
+        threshold = 30000; // Single transaction;
+        // Aggregate 1,00,000 (complex for simple calculator)
+        rate = (residentStatus === 'individual' || residentStatus === 'huf') ?
+        1 : 2; // 1% for Ind/HUF, 2% for others
         isApplicable = (val > threshold);
         remarks = 'Individual/HUF rate is 1%, others 2%. Note: Higher threshold for aggregate payments (₹1,00,000) not covered by this single transaction calculator.';
         break;
@@ -100,7 +113,8 @@ const TDSCalculator = () => {
         threshold = 15000;
         rate = 5;
         isApplicable = (val > threshold);
-        remarks = 'Rate is 5% for resident. If company, rate might be 10%.'; // Simplified to 5% for demo
+        remarks = 'Rate is 5% for resident. If company, rate might be 10%.';
+        // Simplified to 5% for demo
         break;
       case 'Commission/Brokerage':
         applicableSection = '194H';
@@ -117,7 +131,8 @@ const TDSCalculator = () => {
         break;
       case 'Rent (Plant/Machinery/Equipment)':
         applicableSection = '194I';
-        threshold = 240000; // Annual threshold
+        threshold = 240000;
+        // Annual threshold
         rate = 2;
         isApplicable = (val > threshold);
         remarks = 'This threshold is annual. If payer is Individual/HUF not under tax audit, Sec 194IB applies (5% if rent > ₹50,000/month on monthly payments).';
@@ -125,7 +140,8 @@ const TDSCalculator = () => {
       case 'Professional Fees':
         applicableSection = '194J';
         threshold = 30000;
-        rate = 10; // For professional services, royalty (other than films), non-compete fees
+        rate = 10;
+        // For professional services, royalty (other than films), non-compete fees
         isApplicable = (val > threshold);
         remarks = 'Rate is 2% for fees for technical services, call center, film royalty.';
         break;
@@ -138,9 +154,11 @@ const TDSCalculator = () => {
         break;
       case 'Purchase of Immovable Property':
         applicableSection = '194IA';
-        threshold = 5000000; // 50 Lakhs
+        threshold = 5000000;
+        // 50 Lakhs
         rate = 1;
-        isApplicable = (val >= threshold); // >= threshold
+        isApplicable = (val >= threshold);
+        // >= threshold
         remarks = 'Applicable on transfer of immovable property (other than agricultural land).';
         break;
       case 'Rent by Ind/HUF (Not Tax Audit)':
@@ -166,7 +184,8 @@ const TDSCalculator = () => {
         break;
       case 'Virtual Digital Asset Transfer':
         applicableSection = '194S';
-        threshold = 10000; // 50000 for specified persons
+        threshold = 10000;
+        // 50000 for specified persons
         rate = 1;
         isApplicable = (val > threshold);
         remarks = 'Threshold varies for specified persons (buyers).';
@@ -214,12 +233,10 @@ const TDSCalculator = () => {
       return;
     }
     setCaseLawResult('Searching for relevant case laws... (This feature requires a robust backend integration with legal databases like Manupatra, SCC Online, or IndiaKanoon, combined with advanced AI/NLP capabilities for real-time, accurate results. The following is a simulated response based on common scenarios.)');
-
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     const queryLower = caseLawQuery.toLowerCase();
-    let simulatedResponse = `No direct case law found for "${caseLawQuery}".\n\n`;
-
+    let simulatedResponse = `No direct case law found for "${queryLower}".\n\n`;
     if (queryLower.includes('software license') || queryLower.includes('software payment')) {
       simulatedResponse = `**Simulated Case Law Reference for Software Payments (TDS Applicability):**\n` +
         `* **Issue:** Whether payment for software is 'royalty' (Sec. 194J) or 'purchase of copyrighted article' (no TDS on purchase), or 'technical services'.\n` +
@@ -268,13 +285,13 @@ const TDSCalculator = () => {
             Nature of Payment:
           </label>
           <select
-            id="paymentNature"
+           id="paymentNature"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={paymentNature}
             onChange={(e) => {
               setPaymentNature(e.target.value);
               if (!['Contract Payments', 'Interest (Other than Securities)', 'Payments to Non-Residents'].includes(e.target.value)) {
-                setResidentStatus('resident');
+               setResidentStatus('resident');
               }
             }}
           >
@@ -286,7 +303,7 @@ const TDSCalculator = () => {
             <option value="Interest (Other than Securities)">Interest (Other than Securities) - Sec 194A</option>
             <option value="Winnings from Lottery/Games">Winnings from Lottery/Games - Sec 194B/BA/BB</option>
             <option value="Contract Payments">Contract Payments - Sec 194C</option>
-            <option value="Insurance Commission">Insurance Commission - Sec 194D</option>
+             <option value="Insurance Commission">Insurance Commission - Sec 194D</option>
             <option value="Commission/Brokerage">Commission/Brokerage - Sec 194H</option>
             <option value="Rent (Land/Building/Furniture)">Rent (Land/Building/Furniture) - Sec 194I</option>
             <option value="Rent (Plant/Machinery/Equipment)">Rent (Plant/Machinery/Equipment) - Sec 194I</option>
@@ -296,14 +313,14 @@ const TDSCalculator = () => {
             <option value="Rent by Ind/HUF (Not Tax Audit)">Rent by Ind/HUF (Not Tax Audit) - Sec 194IB</option>
             <option value="Purchase of Goods">Purchase of Goods - Sec 194Q</option>
             <option value="Benefits/Perquisites (Business/Profession)">Benefits/Perquisites (Business/Profession) - Sec 194R</option>
-            <option value="Virtual Digital Asset Transfer">Virtual Digital Asset Transfer - Sec 194S</option>
+         <option value="Virtual Digital Asset Transfer">Virtual Digital Asset Transfer - Sec 194S</option>
             <option value="Payments to Non-Residents">Payments to Non-Residents - Sec 195</option>
             <option value="Others">Others (General)</option>
           </select>
         </div>
         <div>
           <label htmlFor="amount" className="block text-gray-700 text-sm font-bold mb-2">
-            Amount (₹):
+           Amount (₹):
             {(paymentNature === 'Rent by Ind/HUF (Not Tax Audit)') && <span className="text-sm text-gray-500 ml-2">(Enter Monthly Rent)</span>}
             {(paymentNature === 'Rent (Land/Building/Furniture)' || paymentNature === 'Rent (Plant/Machinery/Equipment)') && <span className="text-sm text-gray-500 ml-2">(Enter Annual Rent)</span>}
           </label>
@@ -312,34 +329,33 @@ const TDSCalculator = () => {
             id="amount"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+           onChange={(e) => setAmount(e.target.value)}
             placeholder="e.g., 50000"
           />
         </div>
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2">
-            PAN Available?
-          </label>
+            PAN Available? </label>
           <div className="mt-2">
             <label className="inline-flex items-center mr-4">
               <input
                 type="radio"
                 className="form-radio text-indigo-600 rounded-full"
                 name="panAvailable"
-                value="yes"
+               value="yes"
                 checked={panAvailable === 'yes'}
                 onChange={(e) => setPanAvailable(e.target.value)}
               />
               <span className="ml-2 text-gray-700">Yes</span>
             </label>
             <label className="inline-flex items-center">
-              <input
+               <input
                 type="radio"
                 className="form-radio text-indigo-600 rounded-full"
                 name="panAvailable"
                 value="no"
                 checked={panAvailable === 'no'}
-                onChange={(e) => setPanAvailable(e.target.value)}
+                 onChange={(e) => setPanAvailable(e.target.value)}
               />
               <span className="ml-2 text-gray-700">No</span>
             </label>
@@ -351,56 +367,56 @@ const TDSCalculator = () => {
               Payer/Payee Type / Status:
             </label>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
-              <label className="inline-flex items-center">
+               <label className="inline-flex items-center">
                 <input
                   type="radio"
                   className="form-radio text-indigo-600 rounded-full"
                   name="residentStatus"
                   value="individual"
-                  checked={residentStatus === 'individual'}
+                   checked={residentStatus === 'individual'}
                   onChange={(e) => setResidentStatus(e.target.value)}
                 />
                 <span className="ml-2 text-gray-700">Individual/HUF</span>
               </label>
               <label className="inline-flex items-center">
-                <input
+                 <input
                   type="radio"
                   className="form-radio text-indigo-600 rounded-full"
                   name="residentStatus"
                   value="other"
-                  checked={residentStatus === 'other'}
+                 checked={residentStatus === 'other'}
                   onChange={(e) => setResidentStatus(e.target.value)}
                 />
                 <span className="ml-2 text-gray-700">Company/Firm/Other</span>
               </label>
               {paymentNature === 'Interest (Other than Securities)' && (
-                <label className="inline-flex items-center">
+                 <label className="inline-flex items-center">
                   <input
                     type="radio"
                     className="form-radio text-indigo-600 rounded-full"
                     name="residentStatus"
-                    value="senior_citizen"
+                     value="senior_citizen"
                     checked={residentStatus === 'senior_citizen'}
                     onChange={(e) => setResidentStatus(e.target.value)}
                   />
                   <span className="ml-2 text-gray-700">Senior Citizen (for Interest)</span>
-                </label>
+                 </label>
               )}
               {paymentNature === 'Payments to Non-Residents' && (
                 <label className="inline-flex items-center">
                   <input
-                    type="radio"
+                     type="radio"
                     className="form-radio text-indigo-600 rounded-full"
                     name="residentStatus"
                     value="non-resident"
                     checked={residentStatus === 'non-resident'}
-                    onChange={(e) => setResidentStatus(e.target.value)}
+                     onChange={(e) => setResidentStatus(e.target.value)}
                   />
                   <span className="ml-2 text-gray-700">Non-Resident</span>
                 </label>
               )}
             </div>
-          </div>
+           </div>
         )}
       </div>
       <button
@@ -412,7 +428,7 @@ const TDSCalculator = () => {
 
       {tdsResult && (
         <div className="mt-6 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-          <h4 className="text-lg font-semibold text-indigo-800">TDS Calculation Result:</h4>
+           <h4 className="text-lg font-semibold text-indigo-800">TDS Calculation Result:</h4>
           <p className="text-gray-800 mt-2">
             **Status:** <span className={`font-bold ${tdsResult.applicable ? 'text-green-700' : 'text-red-700'}`}>
               {tdsResult.applicable ? 'Applicable' : 'Not Applicable'}
@@ -423,7 +439,7 @@ const TDSCalculator = () => {
               <p className="text-gray-800">
                 **Section:** <span className="font-bold">{tdsResult.section}</span>
               </p>
-              <p className="text-gray-800">
+               <p className="text-gray-800">
                 **Rate:** <span className="font-bold">{tdsResult.rate}</span>
               </p>
               {typeof tdsResult.amount === 'number' && (
@@ -442,7 +458,7 @@ const TDSCalculator = () => {
           {tdsResult.remarks && (
             <p className="text-sm text-gray-700 mt-2">**Remarks:** {tdsResult.remarks}</p>
           )}
-        </div>
+         </div>
       )}
 
       <div className="mt-8 border-t pt-6">
@@ -451,7 +467,7 @@ const TDSCalculator = () => {
           Describe your specific scenario or confusion to find relevant decided case laws for guidance:
         </p>
         <textarea
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 mb-4 rounded-md"
+           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 mb-4 rounded-md"
           rows="4"
           placeholder="e.g., Is payment for software license considered royalty or professional fees? What about services provided by a foreign entity without PE in India? Is reimbursement of actual expenses subject to TDS?"
           value={caseLawQuery}
@@ -462,7 +478,7 @@ const TDSCalculator = () => {
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105 rounded-md"
         >
           Search Case Laws
-        </button>
+         </button>
         {caseLawResult && (
           <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-gray-800 whitespace-pre-wrap">
             {caseLawResult}
@@ -496,7 +512,7 @@ const GSTApplicabilityCalculator = () => {
     { name: 'Chhattisgarh', value: 'CG' }, { name: 'Goa', value: 'GA' },
     { name: 'Gujarat', value: 'GJ' }, { name: 'Haryana', value: 'HR' },
     { name: 'Himachal Pradesh', value: 'HP' }, { name: 'Jharkhand', value: 'JH' },
-    { name: 'Karnataka', value: 'KA' }, { name: 'Kerala', value: 'KL' },
+     { name: 'Karnataka', value: 'KA' }, { name: 'Kerala', value: 'KL' },
     { name: 'Madhya Pradesh', value: 'MP' }, { name: 'Maharashtra', value: 'MH' },
     { name: 'Manipur', value: 'MN' }, { name: 'Meghalaya', value: 'ML' },
     { name: 'Mizoram', value: 'MZ' }, { name: 'Nagaland', value: 'NL' },
@@ -510,7 +526,6 @@ const GSTApplicabilityCalculator = () => {
     { name: 'Delhi', value: 'DL' }, { name: 'Puducherry', value: 'PY' },
     { name: 'Ladakh', value: 'LA' }, { name: 'Jammu and Kashmir', value: 'JK' },
   ];
-
   const calculateGSTApplicability = () => {
     const value = parseFloat(supplyValue);
     if (isNaN(value) || value <= 0) {
@@ -529,7 +544,6 @@ const GSTApplicabilityCalculator = () => {
     let placeOfSupply = '';
     let specialRemarks = '';
     let isApplicable = true;
-
     if (transactionLocation === 'Domestic') {
         if (!supplierState || !recipientState) {
             setGstApplicabilityResult({ applicable: false, message: 'Please select both Supplier and Recipient States for Domestic transaction.' });
@@ -567,7 +581,6 @@ const GSTApplicabilityCalculator = () => {
     }
 
     const isRegisteredRecipient = recipientRegistration === 'registered';
-
     if (transactionLocation === 'Import' && supplyType === 'services') {
       chargeMechanism = 'Reverse Charge (RCM)';
       specialRemarks = (specialRemarks ? specialRemarks + '. ' : '') + 'Recipient is liable to pay GST under RCM.';
@@ -596,7 +609,7 @@ const GSTApplicabilityCalculator = () => {
         case 'insurance_agent_services':
         case 'recovery_agent_services':
         case 'rental_motor_vehicle':
-          chargeMechanism = 'Reverse Charge (RCM)';
+           chargeMechanism = 'Reverse Charge (RCM)';
           specialRemarks = (specialRemarks ? specialRemarks + '. ' : '') + `Recipient (registered person) is liable to pay GST under RCM for ${serviceNature.replace(/_/g, ' ')}.`;
           break;
         default:
@@ -627,13 +640,12 @@ const GSTApplicabilityCalculator = () => {
     { label: "Goods Transport Agency (GTA) Services", value: "gta_services" },
     { label: "Security Services (except Govt.)", value: "security_services" },
     { label: "Services by Director of a Company/Body Corporate", value: "director_services" },
-    { label: "Sponsorship Services", value: "sponsorship_services" },
+     { label: "Sponsorship Services", value: "sponsorship_services" },
     { label: "Services by Insurance Agent", value: "insurance_agent_services" },
     { label: "Services by Recovery Agent", value: "recovery_agent_services" },
     { label: "Rental of Motor Vehicle (by person other than body corporate to body corporate)", value: "rental_motor_vehicle" },
     { label: "Other Services", value: "other_services" },
   ];
-
   return (
     <div className="bg-white p-8 rounded-lg shadow-xl mb-8 font-inter">
       <h3 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">GST Applicability Calculator (GST Act)</h3>
@@ -643,14 +655,14 @@ const GSTApplicabilityCalculator = () => {
             Nature of Supply:
           </label>
           <select
-            id="supplyType"
+             id="supplyType"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={supplyType}
             onChange={(e) => { setSupplyType(e.target.value); setServiceNature(''); }}
           >
             <option value="">-- Select --</option>
             <option value="goods">Goods</option>
-            <option value="services">Services</option>
+             <option value="services">Services</option>
           </select>
         </div>
         <div>
@@ -659,7 +671,7 @@ const GSTApplicabilityCalculator = () => {
           </label>
           <select
             id="transactionLocation"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
+             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={transactionLocation}
             onChange={(e) => {
               setTransactionLocation(e.target.value);
@@ -676,19 +688,19 @@ const GSTApplicabilityCalculator = () => {
             <option value="Import">Import of Goods/Services (Into India)</option>
           </select>
         </div>
-        {transactionLocation === 'Domestic' && (
+         {transactionLocation === 'Domestic' && (
           <>
             <div>
               <label htmlFor="supplierState" className="block text-gray-700 text-sm font-bold mb-2">
                 Supplier's State:
               </label>
               <select
-                id="supplierState"
+                 id="supplierState"
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
                 value={supplierState}
                 onChange={(e) => setSupplierState(e.target.value)}
               >
-                {indianStates.map(state => (
+                 {indianStates.map(state => (
                   <option key={state.value} value={state.value}>{state.name}</option>
                 ))}
               </select>
@@ -700,13 +712,13 @@ const GSTApplicabilityCalculator = () => {
               <select
                 id="recipientState"
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
-                value={recipientState}
+                 value={recipientState}
                 onChange={(e) => setRecipientState(e.target.value)}
               >
                 {indianStates.map(state => (
                   <option key={state.value} value={state.value}>{state.name}</option>
                 ))}
-              </select>
+               </select>
             </div>
           </>
         )}
@@ -716,14 +728,14 @@ const GSTApplicabilityCalculator = () => {
             Recipient's GST Registration Status:
           </label>
           <select
-            id="recipientRegistration"
+             id="recipientRegistration"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={recipientRegistration}
             onChange={(e) => setRecipientRegistration(e.target.value)}
           >
             <option value="">-- Select --</option>
             <option value="registered">Registered Person (Has GSTIN)</option>
-            <option value="unregistered">Unregistered Person/Consumer</option>
+             <option value="unregistered">Unregistered Person/Consumer</option>
           </select>
         </div>
 
@@ -732,13 +744,13 @@ const GSTApplicabilityCalculator = () => {
             <label htmlFor="serviceNature" className="block text-gray-700 text-sm font-bold mb-2">
               Specific Service Nature (if applicable):
             </label>
-            <select
+             <select
               id="serviceNature"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
               value={serviceNature}
               onChange={(e) => setServiceNature(e.target.value)}
             >
-              {serviceNatureOptions.map(option => (
+               {serviceNatureOptions.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
@@ -752,7 +764,7 @@ const GSTApplicabilityCalculator = () => {
             </label>
             <div className="mt-2">
               <label className="inline-flex items-center mr-4">
-                <input
+                 <input
                   type="radio"
                   className="form-radio text-indigo-600 rounded-full"
                   name="isSupplierForeign"
@@ -763,13 +775,13 @@ const GSTApplicabilityCalculator = () => {
                 <span className="ml-2 text-gray-700">No (Indian Supplier)</span>
               </label>
               <label className="inline-flex items-center">
-                <input
+                 <input
                   type="radio"
                   className="form-radio text-indigo-600 rounded-full"
                   name="isSupplierForeign"
                   value="yes"
                   checked={isSupplierForeign === 'yes'}
-                  onChange={(e) => setIsSupplierForeign(e.target.value)}
+                   onChange={(e) => setIsSupplierForeign(e.target.value)}
                 />
                 <span className="ml-2 text-gray-700">Yes (Foreign Supplier)</span>
               </label>
@@ -777,32 +789,31 @@ const GSTApplicabilityCalculator = () => {
           </div>
         )}
 
-        {serviceNature === 'OIDAR_services' && isSupplierForeign === 'yes' && recipientRegistration === 'unregistered' && (
+         {serviceNature === 'OIDAR_services' && isSupplierForeign === 'yes' && recipientRegistration === 'unregistered' && (
             <div className="md:col-span-2">
               <label className="block text-gray-700 text-sm font-bold mb-2">
-                Is Recipient a Non-Taxable Online Recipient (NTOR)?
-              </label>
+                Is Recipient a Non-Taxable Online Recipient (NTOR)? </label>
               <div className="mt-2">
                 <label className="inline-flex items-center mr-4">
                   <input
                     type="radio"
                     className="form-radio text-indigo-600 rounded-full"
-                    name="isRecipientNTOR"
+                     name="isRecipientNTOR"
                     value="yes"
                     checked={isRecipientNTOR === 'yes'}
                     onChange={(e) => setIsRecipientNTOR(e.target.value)}
                   />
-                  <span className="ml-2 text-gray-700">Yes (NTOR: for non-business purpose)</span>
+                   <span className="ml-2 text-gray-700">Yes (NTOR: for non-business purpose)</span>
                 </label>
                 <label className="inline-flex items-center">
                   <input
                     type="radio"
-                    className="form-radio text-indigo-600 rounded-full"
+                     className="form-radio text-indigo-600 rounded-full"
                     name="isRecipientNTOR"
                     value="no"
                     checked={isRecipientNTOR === 'no'}
                     onChange={(e) => setIsRecipientNTOR(e.target.value)}
-                  />
+                   />
                   <span className="ml-2 text-gray-700">No (Otherwise, e.g., for business purpose)</span>
                 </label>
               </div>
@@ -810,14 +821,14 @@ const GSTApplicabilityCalculator = () => {
         )}
 
         <div>
-          <label htmlFor="supplyValue" className="block text-gray-700 text-sm font-bold mb-2">
+           <label htmlFor="supplyValue" className="block text-gray-700 text-sm font-bold mb-2">
             Supply Value (₹):
           </label>
           <input
             type="number"
             id="supplyValue"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
-            value={supplyValue}
+             value={supplyValue}
             onChange={(e) => setSupplyValue(e.target.value)}
             placeholder="e.g., 25000"
           />
@@ -826,7 +837,7 @@ const GSTApplicabilityCalculator = () => {
       <button
         onClick={calculateGSTApplicability}
         className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105 rounded-md"
-      >
+       >
         Check GST Applicability
       </button>
 
@@ -840,19 +851,19 @@ const GSTApplicabilityCalculator = () => {
               </p>
               <p className="text-gray-800">
                 **Place of Supply:** <span className="font-bold">{gstApplicabilityResult.placeOfSupply}</span>
-              </p>
+               </p>
               <p className="text-gray-800">
                 **Charge Mechanism:** <span className="font-bold">{gstApplicabilityResult.charge}</span>
               </p>
               {gstApplicabilityResult.gstType && (
                 <p className="text-gray-800">
-                  **Type of GST:** <span className="font-bold">{gstApplicabilityResult.gstType}</span>
+                   **Type of GST:** <span className="font-bold">{gstApplicabilityResult.gstType}</span>
                 </p>
               )}
               <p className="text-gray-800">
                 **Remarks:** {gstApplicabilityResult.specialRemarks || 'Standard applicability applies.'}
               </p>
-            </>
+             </>
           ) : (
             <p className="text-gray-800 mt-2">
               <span className="font-bold text-red-700">Not Applicable:</span> {gstApplicabilityResult.message}
@@ -861,12 +872,11 @@ const GSTApplicabilityCalculator = () => {
         </div>
       )}
       <p className="text-xs text-gray-500 mt-4">
-        *Disclaimer: This calculator provides indicative GST applicability based on simplified rules under the GST Act. This calculator does not cover all intricacies, specific exemptions, or latest amendments to the GST Act. Place of Supply and Reverse Charge Mechanism rules are highly complex and depend on specific facts, notifications, and circulars. Always consult a qualified GST professional for precise advice.
+         *Disclaimer: This calculator provides indicative GST applicability based on simplified rules under the GST Act. This calculator does not cover all intricacies, specific exemptions, or latest amendments to the GST Act. Place of Supply and Reverse Charge Mechanism rules are highly complex and depend on specific facts, notifications, and circulars. Always consult a qualified GST professional for precise advice.
       </p>
     </div>
   );
 };
-
 // 3. Input Tax Credit (ITC) Availment Calculator
 const ITCAvailmentCalculator = () => {
   const [supplyCategory, setSupplyCategory] = useState('');
@@ -875,12 +885,10 @@ const ITCAvailmentCalculator = () => {
   const [itcAvailmentResult, setItcAvailmentResult] = useState(null);
   const [disputeQuery, setDisputeQuery] = useState('');
   const [disputeCaseLawResult, setDisputeCaseLawResult] = useState('');
-
   const checkITC = () => {
     let eligible = true;
     let message = 'Input Tax Credit is generally eligible subject to fulfillment of conditions.';
     let conditions = [];
-
     // Simplified ITC Logic (based on GST Act rules, especially Section 16 & 17(5) for blocked credits)
 
     if (!supplyCategory || !purposeOfUse) {
@@ -893,7 +901,6 @@ const ITCAvailmentCalculator = () => {
     conditions.push('Receipt of goods/services.');
     conditions.push('Tax charged is paid by supplier to Government.');
     conditions.push('Recipient has filed GSTR-3B.');
-
     // Blocked Credits under Section 17(5) (Illustrative examples)
     if (purposeOfUse === 'personal') {
       eligible = false;
@@ -928,19 +935,16 @@ const ITCAvailmentCalculator = () => {
 
     setItcAvailmentResult({ eligible, message, conditions });
   };
-
   const searchDisputeCaseLaws = async () => {
     if (!disputeQuery.trim()) {
       setDisputeCaseLawResult('Please describe the disputed nature of the goods/services or specific scenario for ITC to search for case laws.');
       return;
     }
     setDisputeCaseLawResult('Searching for relevant case laws... (This feature requires a robust backend integration with legal databases like LegitQuest, Manupatra, or Westlaw India, combined with advanced AI/NLP capabilities for real-time, accurate results. The following is a simulated response based on common ITC disputes.)');
-
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     const queryLower = disputeQuery.toLowerCase();
-    let simulatedResponse = `No direct ITC case law found for "${disputeQuery}".\n\n`;
-
+    let simulatedResponse = `No direct ITC case law found for "${queryLower}".\n\n`;
     if (queryLower.includes('employee benefits') || queryLower.includes('staff welfare')) {
       simulatedResponse = `**Simulated Case Law Reference for ITC on Employee Benefits/Staff Welfare:**\n` +
         `* **Issue:** ITC on various expenses related to employee welfare (e.g., cab services, food, medical facilities, club memberships).\n` +
@@ -978,7 +982,7 @@ const ITCAvailmentCalculator = () => {
             Nature/Category of Goods/Services:
           </label>
           <select
-            id="supplyCategory"
+             id="supplyCategory"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={supplyCategory}
             onChange={(e) => setSupplyCategory(e.target.value)}
@@ -990,21 +994,21 @@ const ITCAvailmentCalculator = () => {
             <option value="professional_fees">Professional / Consultancy Fees</option>
             <option value="motor_vehicles_transport">Motor Vehicles for Transport of Persons (up to 13 Seats)</option>
             <option value="food_beverages_catering">Food, Beverages, Outdoor Catering, Health Services</option>
-            <option value="works_contract_immovable">Works Contract for Immovable Property (Other than Plant & Machinery)</option>
+             <option value="works_contract_immovable">Works Contract for Immovable Property (Other than Plant & Machinery)</option>
             <option value="membership_fees">Membership of Club, Health/Fitness Centre</option>
             <option value="travel_benefits">Travel Benefits to Employees on Leave (LTC/Home Travel Concession)</option>
             <option value="other">Other Business Expense</option>
           </select>
         </div>
         <div>
-          <label htmlFor="purposeOfUse" className="block text-gray-700 text-sm font-bold mb-2">
+           <label htmlFor="purposeOfUse" className="block text-gray-700 text-sm font-bold mb-2">
             Purpose of Use:
           </label>
           <select
             id="purposeOfUse"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
             value={purposeOfUse}
-            onChange={(e) => setPurposeOfUse(e.target.value)}
+             onChange={(e) => setPurposeOfUse(e.target.value)}
           >
             <option value="">-- Select --</option>
             <option value="business">For Business / Furtherance of Business (Taxable Supplies)</option>
@@ -1012,17 +1016,16 @@ const ITCAvailmentCalculator = () => {
             <option value="exempt_supply">For Making Exempt Supplies</option>
           </select>
         </div>
-        <div className="md:col-span-2">
+         <div className="md:col-span-2">
           <label className="block text-gray-700 text-sm font-bold mb-2">
-            Is the Recipient a Composition Scheme Taxpayer?
-          </label>
+            Is the Recipient a Composition Scheme Taxpayer? </label>
           <div className="mt-2">
             <label className="inline-flex items-center mr-4">
               <input
                 type="radio"
                 className="form-radio text-indigo-600 rounded-full"
                 name="isRecipientBlocked"
-                value="no"
+                 value="no"
                 checked={isRecipientBlocked === 'no'}
                 onChange={(e) => setIsRecipientBlocked(e.target.value)}
               />
@@ -1035,7 +1038,7 @@ const ITCAvailmentCalculator = () => {
                 name="isRecipientBlocked"
                 value="yes"
                 checked={isRecipientBlocked === 'yes'}
-                onChange={(e) => setIsRecipientBlocked(e.target.value)}
+                 onChange={(e) => setIsRecipientBlocked(e.target.value)}
               />
               <span className="ml-2 text-gray-700">Yes (Composition Taxpayer)</span>
             </label>
@@ -1044,7 +1047,7 @@ const ITCAvailmentCalculator = () => {
       </div>
       <button
         onClick={checkITC}
-        className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105 rounded-md"
+         className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105 rounded-md"
       >
         Check ITC Availment
       </button>
@@ -1053,12 +1056,11 @@ const ITCAvailmentCalculator = () => {
         <div className="mt-6 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
           <h4 className="text-lg font-semibold text-indigo-800">ITC Availment Result:</h4>
           <p className="text-gray-800 mt-2">
-            ITC is{' '}
+             ITC is{' '}
             <span className={`font-bold ${itcAvailmentResult.eligible ? 'text-green-700' : 'text-red-700'}`}>
               {itcAvailmentResult.eligible ? 'Eligible' : 'Not Eligible'}
             </span>
-            .
-          </p>
+            . </p>
           <p className="text-sm text-gray-600 mt-1">{itcAvailmentResult.message}</p>
           {itcAvailmentResult.eligible && itcAvailmentResult.conditions.length > 0 && (
             <div className="mt-2 text-sm text-gray-700">
@@ -1074,14 +1076,14 @@ const ITCAvailmentCalculator = () => {
       )}
 
       <div className="mt-8 border-t pt-6">
-        <h4 className="text-xl font-bold text-gray-800 mb-4">Disputed Nature of Goods/Services or ITC Availment?</h4>
+         <h4 className="text-xl font-bold text-gray-800 mb-4">Disputed Nature of Goods/Services or ITC Availment?</h4>
         <p className="text-gray-700 mb-4">
           Describe the dispute or the specific goods/services to search for relevant decided case laws for guidance:
         </p>
         <textarea
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 mb-4 rounded-md"
           rows="4"
-          placeholder="e.g., ITC on repairs of rented office building that are capitalized. ITC for common expenses used for both taxable and exempt supplies. ITC on services for employee transport."
+           placeholder="e.g., ITC on repairs of rented office building that are capitalized. ITC for common expenses used for both taxable and exempt supplies. ITC on services for employee transport."
           value={disputeQuery}
           onChange={(e) => setDisputeQuery(e.target.value)}
         ></textarea>
@@ -1090,7 +1092,7 @@ const ITCAvailmentCalculator = () => {
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105 rounded-md"
         >
           Search Case Laws
-        </button>
+         </button>
         {disputeCaseLawResult && (
           <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-gray-800 whitespace-pre-wrap">
             {disputeCaseLawResult}
@@ -1099,12 +1101,10 @@ const ITCAvailmentCalculator = () => {
       </div>
       <p className="text-xs text-gray-500 mt-4">
         *Disclaimer: The ITC availment guidance is indicative and based on simplified interpretations for common scenarios under the GST Act. The "Search Case Laws" feature is simulated and provides illustrative examples; it is not a real-time legal research tool. Actual ITC eligibility and legal interpretations are highly complex and depend on specific facts, latest amendments, notifications, circulars, and judicial precedents. Always consult a qualified GST professional for precise ITC eligibility and legal advice.
-        </p>
-      </div>
-    );
-  };
-
-
+      </p>
+    </div>
+  );
+};
 // LegalUpdates component
 const LegalUpdates = () => {
   const [updates, setUpdates] = useState([]);
@@ -1139,7 +1139,8 @@ const LegalUpdates = () => {
       }
     };
     fetchUpdates();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
+  // Empty dependency array means this runs once on mount
 
    return (
     <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
@@ -1154,17 +1155,17 @@ const LegalUpdates = () => {
             {updates.map((update) => (
               <li key={update.id} className="border-b border-gray-200 pb-3 last:border-b-0">
                 <h4 className="font-bold text-lg mb-1">{update.title}</h4>
-                <p className="text-sm text-gray-600 mb-2">{new Date(update.published_on).toLocaleDateString()}</p>
+                 <p className="text-sm text-gray-600 mb-2">{new Date(update.published_on).toLocaleDateString()}</p>
                 <p className="text-sm text-gray-700 line-clamp-3">{update.summary}</p>
                 {update.source_link && (
                   <a
                     href={update.source_link}
-                    target="_blank"
+                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-indigo-600 underline text-sm mt-2 inline-block"
                   >
                     Read more
-                  </a>
+                   </a>
                 )}
               </li>
             ))}
@@ -1176,24 +1177,23 @@ const LegalUpdates = () => {
       <div className="bg-white p-6 rounded-lg shadow text-center flex flex-col justify-center items-center h-auto max-h-[500px]">
         <h3 className="text-2xl font-bold text-indigo-700 mb-2">📝 Our Latest Blog</h3>
         <p className="text-gray-600 max-w-md">
-          Coming soon: Expert insights and thought leadership from Siddhi Jain & Associates.
-        </p>
+          Coming soon: Expert insights and thought leadership from Siddhi Jain & Associates. </p>
         <p className="text-sm text-gray-500 mt-2">
-          Stay tuned as we share case studies, legal updates, and strategic tips.
-        </p>
+          Stay tuned as we share case studies, legal updates, and strategic tips. </p>
       </div>
     </div>
   );
 };
-
-
 // --- Main App Component ---
 const App = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [session, setSession] = useState(null);
-  const [authMessage, setAuthMessage] = useState(''); // For auth related messages
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // For mobile navigation
-  const [activeCalculatorTab, setActiveCalculatorTab] = useState('tds'); // For the calculator tabs
+  const [authMessage, setAuthMessage] = useState('');
+  // For auth related messages
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // For mobile navigation
+  const [activeCalculatorTab, setActiveCalculatorTab] = useState('tds');
+  // For the calculator tabs
 
   useEffect(() => {
     // Fetch initial session
@@ -1208,272 +1208,15 @@ const App = () => {
     getInitialSession();
 
     // Listen for auth state changes
-    // CORRECTED LINE: Destructure 'subscription' directly from 'data'
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
     // Cleanup the listener on component unmount
-    // CORRECTED LINE: Call unsubscribe on the 'subscription' object
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-
-  const renderSection = () => {
-    switch (activeSection) {
-      case 'home':
-        return (
-          <>
-            <section id="home" className="min-h-[calc(100vh-80px)] py-20 bg-gradient-to-br from-purple-700 to-indigo-900 text-white flex items-center justify-center text-center px-4 md:px-6">
-              <div className="container mx-auto max-w-4xl">
-                <h2 className="text-5xl md:text-6xl font-extrabold mb-4 leading-tight animate-fade-in">
-                  Siddhi Jain & Associates
-                </h2>
-                <p className="text-2xl md:text-3xl font-light mb-8">
-                  Your Partner in Corporate Compliance & Legal Advisory
-                </p>
-                <p className="text-lg md:text-xl mb-10 opacity-90">
-                  Guiding businesses through comprehensive corporate law, tax, and regulatory compliance, ensuring seamless operations and robust governance in India.
-                </p>
-                <button
-                  onClick={() => setActiveSection('services')}
-                  className="bg-white text-indigo-800 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-                >
-                  Explore Our Expertise
-                </button>
-                <LegalUpdates /> {/* Legal Updates component fetches from Supabase */}
-              </div>
-            </section>
-          </>
-        );
-      case 'about':
-        return (
-          <section id="about" className="py-20 bg-gray-100 px-4 md:px-6">
-            <div className="container mx-auto max-w-4xl">
-              <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">About Siddhi Jain & Associates</h2>
-              <div className="bg-white p-8 rounded-lg shadow-xl">
-                <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-                  Siddhi Jain & Associates is a distinguished firm specializing in Company Secretarial services and corporate legal advisory. Led by Siddhi Jain, a highly qualified Company Secretary, our firm is dedicated to empowering businesses with seamless compliance and robust governance frameworks.
-                </p>
-                <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-                  With profound expertise in the Companies Act, FEMA, SEBI Regulations, Income Tax Act, and GST laws, we provide tailored solutions that address the unique challenges of modern businesses. Our commitment is to ensure your enterprise not only adheres to regulatory requirements but also thrives with strategic legal support.
-                </p>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Located in Udaipur, Rajasthan, we serve clients across India, offering personalized attention and up-to-date advice to foster sustainable growth and minimize regulatory risks.
-                </p>
-              </div>
-            </div>
-          </section>
-        );
-      case 'services':
-        return (
-          <section id="services" className="py-20 bg-gray-50 px-4 md:px-6">
-            <div className="container mx-auto max-w-5xl">
-              <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">Our Services</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Company Formation & Structuring</h3>
-                  <p className="text-gray-700">Expert guidance on selecting the right business structure, incorporation, and registration.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">ROC & MCA Compliances</h3>
-                  <p className="text-gray-700">Ensuring timely and accurate filing of all statutory returns and forms with the Registrar of Companies and Ministry of Corporate Affairs.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Secretarial Audit & Due Diligence</h3>
-                  <p className="text-gray-700">Conducting comprehensive secretarial audits and legal due diligence for regulatory compliance and risk assessment.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Corporate Governance Advisory</h3>
-                  <p className="text-gray-700">Advising on best practices for corporate governance, board management, and stakeholder relations.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">FEMA & RBI Compliances</h3>
-                  <p className="text-gray-700">Expert guidance on Foreign Exchange Management Act (FEMA) and Reserve Bank of India (RBI) regulations for foreign investments and remittances.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Intellectual Property Rights</h3>
-                  <p className="text-gray-700">Assistance with trademark, copyright, and patent registration, protection, and advisory.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Legal Drafting & Vetting</h3>
-                  <p className="text-gray-700">Preparation and review of legal documents, agreements, contracts, and corporate resolutions.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Tax Advisory (TDS & GST)</h3>
-                  <p className="text-gray-700">Consultancy on TDS and GST implications, compliances, and optimization strategies.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Winding Up & Strike Off</h3>
-                  <p className="text-gray-700">Assistance with closure of companies, strike off procedures, and liquidation processes.</p>
-                </div>
-              </div>
-              <div className="text-center mt-10">
-                <button
-                  onClick={() => setActiveSection('contact')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-                >
-                  Schedule a Consultation
-                </button>
-              </div>
-            </div>
-          </section>
-        );
-      case 'calculators':
-    return (
-      <section id="calculators" className="py-20 px-4 md:px-8 lg:px-16 bg-white animate-fade-in">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">Calculators</h2>
-
-          {/* Calculator Tabs */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <button
-              onClick={() => setActiveCalculatorTab('tds')}
-              className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
-                ${activeCalculatorTab === 'tds' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              TDS Calculator
-            </button>
-            <button
-              onClick={() => setActiveCalculatorTab('gst')}
-              className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
-                ${activeCalculatorTab === 'gst' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              GST Applicability
-            </button>
-            <button
-              onClick={() => setActiveCalculatorTab('itc')}
-              className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
-                ${activeCalculatorTab === 'itc' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              ITC Availment
-            </button>
-          </div>
-
-          {/* Render Active Calculator */}
-          {activeCalculatorTab === 'tds' && <TDSCalculator />}
-          {activeCalculatorTab === 'gst' && <GSTApplicabilityCalculator />}
-          {activeCalculatorTab === 'itc' && <ITCAvailmentCalculator />}
-
-        </div>
-      </section>
-    );
-      case 'contact':
-        return (
-          <section id="contact" className="py-20 bg-gray-100 px-4 md:px-6">
-            <div className="container mx-auto max-w-2xl">
-              <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">Contact Siddhi Jain & Associates</h2>
-              <div className="bg-white p-8 rounded-lg shadow-xl">
-                <p className="text-lg text-gray-700 mb-6 text-center">
-                  We are here to assist you with all your corporate compliance and legal advisory needs. Reach out to us using the information below or the contact form:
-                </p>
-                <form
-                  action="https://formspree.io/f/mwpboqlo" // Replace with your actual Formspree endpoint
-                  method="POST"
-                  className="space-y-6"
-                >
-                  <div>
-                    <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
-                      Your Name:
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
-                      placeholder="Enter your full name"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-                      Your Email:
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
-                      placeholder="your.email@example.com"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-gray-700 text-sm font-bold mb-2">
-                      Phone Number (Optional):
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
-                      placeholder="+91 XXXXXXXXXX"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block text-gray-700 text-sm font-bold mb-2">
-                      Your Inquiry:
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows="5"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500 rounded-md"
-                      placeholder="Describe your query or service requirement..."
-                      required
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg w-full transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 rounded-md"
-                  >
-                    Send Message
-                  </button>
-                </form>
-                <div className="mt-8 text-center text-gray-700 border-t pt-6">
-                  <p className="font-semibold text-lg">Siddhi Jain & Associates</p>
-                  <p className="mt-2">22/E Aashirvad Nagar University Road,</p>
-                  <p>Udaipur, Rajasthan, India - 313001</p>
-                  <p className="mt-4">Email: <a href="mailto:fcssiddhijain@gmail.com" className="text-indigo-600 hover:underline">fcssiddhijain@gmail.com</a></p>
-                  <p>Phone: <a href="tel:+918454079700" className="text-indigo-600 hover:underline">+91 8454079700</a></p>
-                </div>
-                <div className="mt-8 border-t pt-6 text-center">
-                  <h4 className="text-xl font-bold text-gray-800 mb-4">Client Login / Signup</h4>
-                  {!session ? (
-                    <Auth setAuthMessage={setAuthMessage} /> // Pass setAuthMessage to Auth component
-                  ) : (
-                    <div className="text-center">
-                      <p className="text-lg text-green-700 font-semibold mb-4">
-                        Welcome, {session.user.email}! You are logged in.
-                      </p>
-                      <button
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105"
-                        onClick={async () => {
-                          const { error } = await supabase.auth.signOut();
-                          if (error) {
-                            console.error('Error logging out:', error.message);
-                            setAuthMessage(`Error logging out: ${error.message}`);
-                          } else {
-                            setSession(null);
-                            setAuthMessage('Logged out successfully.');
-                          }
-                        }}
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                  {authMessage && <p className={`text-sm mt-2 ${authMessage.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>{authMessage}</p>}
-                </div>
-              </div>
-            </div>
-          </section>
-        );
-      default:
-        return null;
-    }
-  };
 
   // Auth component for Supabase authentication
   const Auth = ({ setAuthMessage }) => {
@@ -1481,11 +1224,11 @@ const App = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
-
     const handleAuth = async (event) => {
       event.preventDefault();
       setLoading(true);
-      setAuthMessage(''); // Clear previous messages
+      setAuthMessage('');
+      // Clear previous messages
 
       let authPromise;
       if (isSignUp) {
@@ -1495,7 +1238,6 @@ const App = () => {
       }
 
       const { data, error } = await authPromise;
-
       if (error) {
         setAuthMessage(`Error ${isSignUp ? 'signing up' : 'logging in'}: ${error.message}`);
       } else if (data.user) {
@@ -1512,7 +1254,7 @@ const App = () => {
           placeholder="Your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
+           required
         />
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline max-w-sm rounded-md"
@@ -1521,7 +1263,7 @@ const App = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-        />
+         />
         <button
           type="submit"
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105 rounded-md w-full max-w-sm"
@@ -1535,7 +1277,8 @@ const App = () => {
           onClick={() => {
             setIsSignUp(!isSignUp);
             setAuthMessage(''); // Clear message on toggle
-            setEmail(''); // Clear inputs on toggle
+            setEmail('');
+            // Clear inputs on toggle
             setPassword('');
           }}
         >
@@ -1544,6 +1287,305 @@ const App = () => {
       </form>
     );
   };
+
+  const renderSection = () => {
+  switch (activeSection) {
+    case 'home':
+      return (
+        <>
+          <Helmet>
+            <title>Siddhi Jain & Associates - Corporate Compliance & Legal Advisory</title>
+            <meta name="description" content="Siddhi Jain & Associates: Your trusted partner for corporate law, tax, and regulatory compliance in India. Specializing in Company Law, FEMA, SEBI, and GST advisory." />
+             <link rel="canonical" href="https://www.cssiddhijain.com/" /> {/* IMPORTANT: Replace with your actual live domain */}
+          </Helmet>
+          <section id="home" className="min-h-[calc(100vh-80px)] py-20 bg-gradient-to-br from-purple-700 to-indigo-900 text-white flex items-center justify-center text-center px-4 md:px-6">
+            <div className="container mx-auto max-w-4xl">
+              <h2 className="text-5xl md:text-6xl font-extrabold mb-4 leading-tight animate-fade-in">
+                 Siddhi Jain & Associates
+              </h2>
+              <p className="text-2xl md:text-3xl font-light mb-8">
+                Your Partner in Corporate Compliance & Legal Advisory
+              </p>
+              <p className="text-lg md:text-xl mb-10 opacity-90">
+                 Guiding businesses through comprehensive corporate law, tax, and regulatory compliance, ensuring seamless operations and robust governance in India. </p>
+              <button
+                onClick={() => setActiveSection('services')}
+                className="bg-white text-indigo-800 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+              >
+                Explore Our Expertise
+               </button>
+              <LegalUpdates /> {/* Legal Updates component fetches from Supabase */}
+            </div>
+          </section>
+
+          
+        </>
+      );
+    case 'about':
+      return (
+        <>
+          <Helmet>
+            <title>About Us - Siddhi Jain & Associates</title>
+            <meta name="description" content="Learn about Siddhi Jain & Associates, a leading firm providing corporate, legal, and tax advisory services. Our expertise and commitment to compliance." />
+            <link rel="canonical" href="https://www.cssiddhijain.com/about" /> {/* IMPORTANT: Replace with your actual live domain */}
+          </Helmet>
+          <section id="about" className="py-20 bg-gray-100 px-4 md:px-6">
+            <div className="container mx-auto max-w-4xl">
+              <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">About Siddhi Jain & Associates</h2>
+              <div className="bg-white p-8 rounded-lg shadow-xl">
+                 <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                  Siddhi Jain & Associates is a distinguished firm specializing in Company Secretarial services and corporate legal advisory. Led by Siddhi Jain, a highly qualified Company Secretary, our firm is dedicated to empowering businesses with seamless compliance and robust governance frameworks. </p>
+                <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                  With profound expertise in the Companies Act, FEMA, SEBI Regulations, Income Tax Act, and GST laws, we provide tailored solutions that address the unique challenges of modern businesses. Our commitment is to ensure your enterprise not strictly adheres to regulatory requirements but also thrives with strategic legal support. </p>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  Located in Udaipur, Rajasthan, we serve clients across India, offering personalized attention and up-to-date advice to foster sustainable growth and minimize regulatory risks. </p>
+              </div>
+            </div>
+          </section>
+        </>
+        );
+    case 'services':
+      return (
+        <>
+          <Helmet>
+            <title>Our Services - Corporate, Legal & Tax Advisory | Siddhi Jain & Associates</title>
+            <meta name="description" content="Explore the range of services offered by Siddhi Jain & Associates: Company Law, Secretarial Audit, FEMA, SEBI, GST, Intellectual Property, and Business Advisory." />
+            <link rel="canonical" href="https://www.cssiddhijain.com/services" /> {/* IMPORTANT: Replace with your actual live domain */}
+          </Helmet>
+          <section id="services" className="py-20 bg-gray-50 px-4 md:px-6">
+            <div className="container mx-auto max-w-5xl">
+              <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">Our Services</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Company Formation & Structuring</h3>
+                  <p className="text-gray-700">Expert guidance on selecting the right business structure, incorporation, and registration.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">ROC & MCA Compliances</h3>
+                  <p className="text-gray-700">Ensuring timely and accurate filing of all statutory returns and forms with the Registrar of Companies and Ministry of Corporate Affairs.</p>
+                </div>
+                 <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Secretarial Audit & Due Diligence</h3>
+                  <p className="text-gray-700">Conducting comprehensive secretarial audits and legal due diligence for regulatory compliance and risk assessment.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Corporate Governance Advisory</h3>
+                  <p className="text-gray-700">Advising on best practices for corporate governance, board management, and stakeholder relations.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                   <h3 className="text-xl font-semibold text-indigo-700 mb-3">FEMA & RBI Compliances</h3>
+                  <p className="text-gray-700">Expert guidance on Foreign Exchange Management Act (FEMA) and Reserve Bank of India (RBI) regulations for foreign investments and remittances.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Intellectual Property Rights</h3>
+                  <p className="text-gray-700">Assistance with trademark, copyright, and patent registration, protection, and advisory.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                   <h3 className="text-xl font-semibold text-indigo-700 mb-3">Legal Drafting & Vetting</h3>
+                  <p className="text-gray-700">Preparation and review of legal documents, agreements, contracts, and corporate resolutions.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                   <h3 className="text-xl font-semibold text-indigo-700 mb-3">Tax Advisory (TDS & GST)</h3>
+                  <p className="text-gray-700">Consultancy on TDS and GST implications, compliances, and optimization strategies.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h3 className="text-xl font-semibold text-indigo-700 mb-3">Winding Up & Strike Off</h3>
+                  <p className="text-gray-700">Assistance with closure of companies, strike off procedures, and liquidation processes.</p>
+                </div>
+              </div>
+              <div className="text-center mt-10">
+                <button
+                   onClick={() => setActiveSection('contact')}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                >
+                  Schedule a Consultation
+                 </button>
+              </div>
+            </div>
+          </section>
+        </>
+        );
+    case 'calculators':
+      return (
+        <>
+          <Helmet>
+            <title>Online Calculators - TDS, GST, ITC | Siddhi Jain & Associates</title>
+            <meta name="description" content="Use our free online calculators for TDS, GST Applicability, and Input Tax Credit (ITC) Availment. Quick tools for tax and compliance estimations." />
+            <link rel="canonical" href="https://www.cssiddhijain.com/calculators" /> {/* IMPORTANT: Replace with your actual live domain */}
+          </Helmet>
+          <section id="calculators" className="py-20 px-4 md:px-8 lg:px-16 bg-white animate-fade-in">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">Calculators</h2>
+
+              {/* Calculator Tabs */}
+               <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <button
+                  onClick={() => setActiveCalculatorTab('tds')}
+                  className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
+                    ${activeCalculatorTab === 'tds' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                >
+                  TDS Calculator
+                </button>
+                <button
+                  onClick={() => setActiveCalculatorTab('gst')}
+                   className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
+                    ${activeCalculatorTab === 'gst' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                >
+                  GST Applicability
+                </button>
+                <button
+                  onClick={() => setActiveCalculatorTab('itc')}
+                   className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
+                    ${activeCalculatorTab === 'itc' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                >
+                  ITC Availment
+                </button>
+              </div>
+
+              {/* Render Active Calculator */}
+               {activeCalculatorTab === 'tds' && <TDSCalculator />}
+              {activeCalculatorTab === 'gst' && <GSTApplicabilityCalculator />}
+              {activeCalculatorTab === 'itc' && <ITCAvailmentCalculator />}
+
+            </div>
+          </section>
+        </>
+      );
+    case 'contact':
+  return (
+    <>
+      <Helmet>
+        <title>Contact Us - Siddhi Jain & Associates</title>
+        <meta name="description" content="Contact Siddhi Jain & Associates for corporate, legal, and tax advisory services. Get in touch for expert compliance and business solutions." />
+        <link rel="canonical" href="https://www.cssiddhijain.com/contact" />
+      </Helmet>
+      <section id="contact" className="py-20 bg-gray-100 px-4 md:px-6">
+        <div className="container mx-auto max-w-2xl">
+           <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">Contact Siddhi Jain & Associates</h2>
+          <p className="text-lg text-gray-700 mb-6 text-center">
+            We are here to assist you with all your corporate compliance and legal advisory needs. Reach out to us using the information below or the contact form:
+          </p>
+          <form
+             action="https://formspree.io/f/mwpboqlo"
+            method="POST"
+            className="space-y-6"
+          >
+            <div>
+              <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
+                Your Name:
+              </label>
+               <input
+                type="text"
+                id="name"
+                name="name"
+                className="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                 placeholder="Enter your full name"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
+                Your Email:
+               </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                placeholder="your.email@example.com"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="block text-gray-700 text-sm font-bold mb-2">
+                 Phone Number (Optional):
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                className="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                placeholder="+91 XXXXXXXXXX"
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="block text-gray-700 text-sm font-bold mb-2">
+                 Your Inquiry:
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="5"
+                className="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                placeholder="Describe your query or service requirement..."
+                required
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg w-full transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+            >
+              Send Message
+            </button>
+          </form>
+
+          <div className="mt-8 text-center text-gray-700 border-t pt-6">
+             <p className="font-semibold text-lg">Siddhi Jain & Associates</p>
+            <p className="mt-2">22/E Aashirvad Nagar University Road,</p>
+            <p>Udaipur, Rajasthan, India - 313001</p>
+            <p className="mt-4">
+              Email: <a href="mailto:fcssiddhijain@gmail.com" className="text-indigo-600 hover:underline">fcssiddhijain@gmail.com</a>
+            </p>
+            <p>
+               Phone: <a href="tel:+918454079700" className="text-indigo-600 hover:underline">+91 8454079700</a>
+            </p>
+          </div>
+
+          <div className="mt-8 border-t pt-6 text-center">
+            <h4 className="text-xl font-bold text-gray-800 mb-4">Client Login / Signup</h4>
+            {
+              !session ? (
+                <>
+                  {/* Pass setAuthMessage to Auth component */}
+                  <Auth setAuthMessage={setAuthMessage} />
+                </>
+              ) : (
+                 <div className="text-center">
+                  <p className="text-lg text-green-700 font-semibold mb-4">
+                    Welcome, {session.user.email}! You are logged in.
+                  </p>
+                  <button
+                     className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-200 ease-in-out transform hover:scale-105"
+                    onClick={async () => {
+                      const { error } = await supabase.auth.signOut();
+                      if (error) {
+                        console.error('Error logging out:', error.message);
+                        setAuthMessage(`Error logging out: ${error.message}`);
+                      } else {
+                         setSession(null);
+                        setAuthMessage('Logged out successfully.');
+                      }
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+               )
+            }
+            {authMessage && (
+              <p className={`text-sm mt-2 ${authMessage.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>
+                {authMessage}
+              </p>
+             )}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+  default:
+    return null;
+  }
+};
 
   return (
     <div className="font-sans antialiased text-gray-900">
@@ -1556,14 +1598,14 @@ const App = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <button
+         <button
             className="md:hidden text-white focus:outline-none"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-            ) : (
+             ) : (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
             )}
             </svg>
@@ -1619,7 +1661,7 @@ const App = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white p-8 text-center">
         <div className="container mx-auto px-4">
-          <p className="text-sm">&copy; {new Date().getFullYear()} Siddhi Jain & Associates. All rights reserved.</p>
+           <p className="text-sm">&copy; {new Date().getFullYear()} Siddhi Jain & Associates. All rights reserved.</p>
           <p className="text-xs mt-2 opacity-75">Professional Compliance. Strategic Advisory.</p>
         </div>
       </footer>
@@ -1627,27 +1669,22 @@ const App = () => {
       {/* Global styles for smooth scrolling and base font */}
       <style>{`
         html {
-          scroll-behavior: smooth;
-        }
+          scroll-behavior: smooth; }
         body {
-          font-family: 'Inter', sans-serif;
-          margin: 0;
+          font-family: 'Inter', sans-serif; margin: 0;
           padding: 0;
           box-sizing: border-box;
         }
         @keyframes fade-in {
           from {
-            opacity: 0;
-            transform: translateY(-20px);
+            opacity: 0; transform: translateY(-20px);
           }
           to {
-            opacity: 1;
-            transform: translateY(0);
+            opacity: 1; transform: translateY(0);
           }
         }
         .animate-fade-in {
-          animation: fade-in 1s ease-out forwards;
-        }
+          animation: fade-in 1s ease-out forwards; }
       `}</style>
     </div>
   );
