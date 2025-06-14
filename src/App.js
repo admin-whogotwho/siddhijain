@@ -1192,6 +1192,8 @@ const App = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [session, setSession] = useState(null);
   const [authMessage, setAuthMessage] = useState(''); // For auth related messages
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // For mobile navigation
+  const [activeCalculatorTab, setActiveCalculatorTab] = useState('tds'); // For the calculator tabs
 
   useEffect(() => {
     // Fetch initial session
@@ -1206,13 +1208,15 @@ const App = () => {
     getInitialSession();
 
     // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    // CORRECTED LINE: Destructure 'subscription' directly from 'data'
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
     // Cleanup the listener on component unmount
+    // CORRECTED LINE: Call unsubscribe on the 'subscription' object
     return () => {
-      authListener.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -1317,21 +1321,44 @@ const App = () => {
           </section>
         );
       case 'calculators':
-        return (
-          <section id="calculators" className="py-20 bg-gradient-to-br from-indigo-500 to-purple-600 text-white px-4 md:px-6">
-            <div className="container mx-auto max-w-4xl">
-              <h2 className="text-4xl font-bold mb-8 text-center">Useful Calculators</h2>
-              <div className="grid grid-cols-1 gap-8">
-                <TDSCalculator />
-                <GSTApplicabilityCalculator />
-                <ITCAvailmentCalculator />
-              </div>
-              <p className="text-center text-sm opacity-80 mt-8">
-                **Disclaimer:** The calculators provided on this website are for general informational purposes and simplified estimation only. They are not intended to be a substitute for professional legal, tax, or financial advice. Tax laws (Income Tax Act, 1961, GST Act, etc.) are complex and subject to frequent changes, and their application can vary significantly based on specific facts, circumstances, notifications, circulars, and judicial pronouncements. Always consult a qualified Company Secretary, Chartered Accountant, or tax professional for accurate calculations, legal compliance, and personalized advice regarding your specific situation. Siddhi Jain & Associates disclaims any liability for reliance on these calculators.
-              </p>
-            </div>
-          </section>
-        );
+    return (
+      <section id="calculators" className="py-20 px-4 md:px-8 lg:px-16 bg-white animate-fade-in">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">Calculators</h2>
+
+          {/* Calculator Tabs */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <button
+              onClick={() => setActiveCalculatorTab('tds')}
+              className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
+                ${activeCalculatorTab === 'tds' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            >
+              TDS Calculator
+            </button>
+            <button
+              onClick={() => setActiveCalculatorTab('gst')}
+              className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
+                ${activeCalculatorTab === 'gst' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            >
+              GST Applicability
+            </button>
+            <button
+              onClick={() => setActiveCalculatorTab('itc')}
+              className={`px-6 py-3 rounded-full text-lg font-semibold transition duration-300
+                ${activeCalculatorTab === 'itc' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            >
+              ITC Availment
+            </button>
+          </div>
+
+          {/* Render Active Calculator */}
+          {activeCalculatorTab === 'tds' && <TDSCalculator />}
+          {activeCalculatorTab === 'gst' && <GSTApplicabilityCalculator />}
+          {activeCalculatorTab === 'itc' && <ITCAvailmentCalculator />}
+
+        </div>
+      </section>
+    );
       case 'contact':
         return (
           <section id="contact" className="py-20 bg-gray-100 px-4 md:px-6">
@@ -1408,7 +1435,7 @@ const App = () => {
                   <p className="font-semibold text-lg">Siddhi Jain & Associates</p>
                   <p className="mt-2">22/E Aashirvad Nagar University Road,</p>
                   <p>Udaipur, Rajasthan, India - 313001</p>
-                  <p className="mt-4">Email: <a href="mailto:siddhisjain@gmail.com" className="text-indigo-600 hover:underline">siddhisjain@gmail.com</a></p>
+                  <p className="mt-4">Email: <a href="mailto:fcssiddhijain@gmail.com" className="text-indigo-600 hover:underline">fcssiddhijain@gmail.com</a></p>
                   <p>Phone: <a href="tel:+918454079700" className="text-indigo-600 hover:underline">+91 8454079700</a></p>
                 </div>
                 <div className="mt-8 border-t pt-6 text-center">
@@ -1521,53 +1548,70 @@ const App = () => {
   return (
     <div className="font-sans antialiased text-gray-900">
       {/* Navigation Bar */}
-      <nav className="bg-gray-800 text-white p-4 shadow-lg sticky top-0 z-50">
-        <div className="container mx-auto flex justify-between items-center px-4">
-          <div className="flex items-center space-x-3">
-            {/* CS Logo added here */}
-            <img
-              src="/cs-logo.png" // This is the exact line that needs to be present and uncommented
-              alt="Siddhi Jain & Associates Logo"
-              className="h-10 w-auto" // And this line defines its appearance
-            />
-            <span className="text-2xl font-bold text-indigo-300">
-              Siddhi Jain & Associates
-            </span>
-          </div>
-          <div className="flex space-x-6">
-            <button
-              onClick={() => setActiveSection('home')}
-              className={`hover:text-indigo-300 transition duration-200 ${activeSection === 'home' ? 'text-indigo-300 font-semibold' : ''}`}
-            >
-              Home
-            </button>
-            <button
-              onClick={() => setActiveSection('about')}
-              className={`hover:text-indigo-300 transition duration-200 ${activeSection === 'about' ? 'text-indigo-300 font-semibold' : ''}`}
-            >
-              About
-            </button>
-            <button
-              onClick={() => setActiveSection('services')}
-              className={`hover:text-indigo-300 transition duration-200 ${activeSection === 'services' ? 'text-indigo-300 font-semibold' : ''}`}
-            >
-              Services
-            </button>
-            <button
-              onClick={() => setActiveSection('calculators')}
-              className={`hover:text-indigo-300 transition duration-200 ${activeSection === 'calculators' ? 'text-indigo-300 font-semibold' : ''}`}
-            >
-              Calculators
-            </button>
-            <button
-              onClick={() => setActiveSection('contact')}
-              className={`hover:text-indigo-300 transition duration-200 ${activeSection === 'contact' ? 'text-indigo-300 font-semibold' : ''}`}
-            >
-              Contact
-            </button>
-          </div>
+<nav className="bg-gray-900 text-white p-4 shadow-md sticky top-0 z-50">
+    <div className="container mx-auto flex justify-between items-center flex-wrap">
+        {/* Logo/Brand Name */}
+        <div className="text-2xl font-bold text-indigo-300">
+            Siddhi Jain & Associates
         </div>
-      </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+            className="md:hidden text-white focus:outline-none"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            )}
+            </svg>
+        </button>
+
+        {/* Navigation Links */}
+        <div
+            // This class makes the menu visible/hidden based on screen size and isMobileMenuOpen state
+            className={`w-full md:flex md:items-center md:w-auto mt-4 md:mt-0 ${isMobileMenuOpen ? 'block' : 'hidden'}`}
+        >
+            <button
+            onClick={() => { setActiveSection('home'); setIsMobileMenuOpen(false); }} // Added setIsMobileMenuOpen(false)
+            className={`block md:inline-block mt-2 md:mt-0 ml-0 md:ml-6 py-2 px-3 rounded hover:bg-gray-700 transition duration-200
+                ${activeSection === 'home' ? 'text-indigo-300 font-semibold' : ''}`}
+            >
+            Home
+            </button>
+            <button
+            onClick={() => { setActiveSection('about'); setIsMobileMenuOpen(false); }} // Added setIsMobileMenuOpen(false)
+            className={`block md:inline-block mt-2 md:mt-0 ml-0 md:ml-6 py-2 px-3 rounded hover:bg-gray-700 transition duration-200
+                ${activeSection === 'about' ? 'text-indigo-300 font-semibold' : ''}`}
+            >
+            About
+            </button>
+            <button
+            onClick={() => { setActiveSection('services'); setIsMobileMenuOpen(false); }} // Added setIsMobileMenuOpen(false)
+            className={`block md:inline-block mt-2 md:mt-0 ml-0 md:ml-6 py-2 px-3 rounded hover:bg-gray-700 transition duration-200
+                ${activeSection === 'services' ? 'text-indigo-300 font-semibold' : ''}`}
+            >
+            Services
+            </button>
+            <button
+            onClick={() => { setActiveSection('calculators'); setIsMobileMenuOpen(false); }} // Added setIsMobileMenuOpen(false)
+            className={`block md:inline-block mt-2 md:mt-0 ml-0 md:ml-6 py-2 px-3 rounded hover:bg-gray-700 transition duration-200
+                ${activeSection === 'calculators' ? 'text-indigo-300 font-semibold' : ''}`}
+            >
+            Calculators
+            </button>
+            <button
+            onClick={() => { setActiveSection('contact'); setIsMobileMenuOpen(false); }} // Added setIsMobileMenuOpen(false)
+            className={`block md:inline-block mt-2 md:mt-0 ml-0 md:ml-6 py-2 px-3 rounded hover:bg-gray-700 transition duration-200
+                ${activeSection === 'contact' ? 'text-indigo-300 font-semibold' : ''}`}
+            >
+            Contact
+            </button>
+        </div>
+    </div>
+</nav>
 
       {/* Render Active Section */}
       {renderSection()}
