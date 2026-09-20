@@ -25,7 +25,7 @@ export default function GSTImportCalculatorPage(){
  return <><Helmet><title>GST Import Calculator | Customs Value, BCD, SWS & IGST</title><meta name="description" content="Calculate indicative IGST and customs tax on imports into India using assessable value, BCD, Social Welfare Surcharge and IGST."/><link rel="canonical" href="https://www.cssiddhijain.com/calculators/gst-import"/></Helmet>
  <main className="min-h-screen bg-slate-50 py-10 px-4"><div className="max-w-6xl mx-auto">
  <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">GST Technical Tool</p><h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">GST Import Calculator</h1>
- <p className="text-gray-600 mt-3 max-w-4xl">Estimate import IGST and the principal customs components from the assessable value. All imports are treated as inter-State supplies for GST purposes and IGST is levied in addition to customs duties. citeturn4search0</p>
+ <p className="text-gray-600 mt-3 max-w-4xl">Estimate import IGST and the principal customs components from the assessable value. All imports are treated as inter-State supplies for GST purposes and IGST is levied in addition to customs duties.</p>
  <div className="grid lg:grid-cols-5 gap-6 mt-8">
  <section className="lg:col-span-3 bg-white rounded-2xl border border-gray-200 p-6 md:p-8"><div className="grid md:grid-cols-2 gap-5">
  <Field label="Assessable value (₹)" hint="Use the customs assessable value, not merely the commercial invoice value."><input className={cls} type="number" min="0" value={assessable} onChange={e=>setAssessable(e.target.value)} placeholder="e.g. 1000000"/></Field>
@@ -38,7 +38,7 @@ export default function GSTImportCalculatorPage(){
  <section className="lg:col-span-2 bg-slate-900 text-white rounded-2xl p-6 md:p-8"><p className="text-sm text-slate-300">Estimated import taxes</p><div className="text-4xl font-bold mt-2">{money(result.total)}</div>
  <div className="border-t border-slate-700 my-6"/><div className="space-y-3 text-sm">
  <Row label="BCD" value={money(result.bcdAmt)}/><Row label="SWS" value={money(result.swsAmt)}/><Row label="IGST base" value={money(result.dutyBase)}/><Row label="IGST" value={money(result.igstAmt)}/><Row label="Cess" value={money(result.cessAmt)}/>
- </div><div className="mt-6 rounded-xl bg-slate-800 p-4 text-xs text-slate-300 leading-relaxed">IGST paid on imports can generally form part of eligible ITC, subject to the normal ITC conditions and restrictions. citeturn4search0</div>
+ </div><div className="mt-6 rounded-xl bg-slate-800 p-4 text-xs text-slate-300 leading-relaxed">IGST paid on imports can generally form part of eligible ITC, subject to the normal ITC conditions and restrictions.</div>
  </section></div>
  <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-5 text-sm text-gray-600"><strong className="text-gray-800">Important:</strong> This is an estimator, not a customs duty assessment engine. BCD, SWS, exemptions, preferential rates, valuation, anti-dumping/safeguard duties, compensation cess and the correct IGST rate depend on the tariff classification, notification and facts.</div>
  </div></main></>;
