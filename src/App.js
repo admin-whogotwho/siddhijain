@@ -15,6 +15,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import TDSCalculatorPage from './pages/TDSCalculatorPage';
 import GSTApplicabilityCalculatorPage from './pages/GSTApplicabilityCalculatorPage';
 import ITCAvailmentCalculatorPage from './pages/ITCAvailmentCalculatorPage';
+import GSTCalculatorPage from './pages/GSTCalculatorPage';
+import IncomeTaxCalculatorPage from './pages/IncomeTaxCalculatorPage';
 
 // Home Page Component
 const HomePage = () => { // Removed setActiveSection prop as it's not directly used for scrolling now
@@ -472,45 +474,47 @@ const ContactPage = () => {
 };
 
 
-// New Calculators Page Component
+// Calculators Page Component
 const CalculatorsPage = () => {
     return (
         <>
             <Helmet>
-                <title>GST & TDS Calculators Online | Tax Tools - Siddhi Jain & Associates</title>
-                <meta name="description" content="Access free online GST and TDS calculators by Siddhi Jain & Associates. Tools to determine GST applicability, ITC eligibility, and TDS deductions." />
-                <link rel="canonical" href="https://www.cssiddhijain.com/calculators" /> {/* IMPORTANT: Replace with your actual live domain */}
+                <title>GST & Income Tax Calculators 2026 | Siddhi Jain & Associates</title>
+                <meta
+                    name="description"
+                    content="Free, user-friendly GST and Income Tax calculators for India. Calculate GST, CGST, SGST, IGST and estimate income tax for Tax Year 2026-27."
+                />
+                <link rel="canonical" href="https://www.cssiddhijain.com/calculators" />
             </Helmet>
-            <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 px-4 text-center">
-                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 animate-fade-in-up">Our Calculators</h1>
-                <p className="text-xl opacity-90 animate-fade-in-up animation-delay-200">
-                    Simplify your tax and compliance calculations with our free online tools.
-                </p>
+
+            <section className="bg-slate-900 text-white py-16 px-4 text-center">
+                <div className="max-w-4xl mx-auto">
+                    <p className="text-sm font-semibold text-teal-300 uppercase tracking-wide">Tax Tools</p>
+                    <h1 className="text-4xl md:text-5xl font-extrabold mt-3">Simple. Practical. Current.</h1>
+                    <p className="text-lg md:text-xl text-slate-300 mt-4">
+                        Free calculators designed around the current Indian GST and income-tax framework.
+                    </p>
+                </div>
             </section>
 
-            <section className="py-12 px-4 md:px-8 lg:px-16 bg-gray-50">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Choose a Calculator</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <CalculatorLinkCard
-                            title="TDS Calculator"
-                            description="Calculate TDS (Tax Deducted at Source) on various payments as per Income Tax Act, 1961."
-                            link="/calculators/tds"
-                            icon="📊"
-                        />
-                        <CalculatorLinkCard
-                            title="GST Applicability Calculator"
-                            description="Determine GST type (CGST/SGST/IGST), Place of Supply, and Reverse Charge Mechanism for transactions."
-                            link="/calculators/gst-applicability"
-                            icon="🧾"
-                        />
-                        <CalculatorLinkCard
-                            title="ITC Availment Calculator"
-                            description="Check Input Tax Credit (ITC) eligibility and understand blocked credits under GST."
-                            link="/calculators/itc-availment"
-                            icon="💡"
-                        />
-                    </div>
+            <section className="py-12 px-4 md:px-8 bg-slate-50">
+                <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
+                    <CalculatorLinkCard
+                        title="GST Calculator"
+                        description="Calculate GST-inclusive or exclusive amounts and automatically split CGST + SGST or IGST."
+                        link="/calculators/gst"
+                        icon="GST"
+                    />
+                    <CalculatorLinkCard
+                        title="Income Tax Calculator"
+                        description="Estimate individual income tax for Tax Year 2026-27 and compare it with the old regime for AY 2026-27."
+                        link="/calculators/income-tax"
+                        icon="IT"
+                    />
+                </div>
+
+                <div className="max-w-5xl mx-auto mt-8 bg-white border border-gray-200 rounded-2xl p-5 text-sm text-gray-600">
+                    <strong className="text-gray-800">Important:</strong> These tools are estimators. Tax rates, exemptions, deductions, classifications and eligibility can depend on the exact facts and current notifications.
                 </div>
             </section>
         </>
@@ -519,14 +523,14 @@ const CalculatorsPage = () => {
 
 const CalculatorLinkCard = ({ title, description, link, icon }) => {
     return (
-        <Link to={link} className="block">
-            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out h-full">
-                <div className="text-5xl mb-4">{icon}</div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">{title}</h3>
-                <p className="text-gray-700 flex-grow">{description}</p>
-                <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-md">
-                    Use Calculator
-                </button>
+        <Link to={link} className="block h-full">
+            <div className="bg-white border border-gray-200 p-7 rounded-2xl shadow-sm flex flex-col h-full hover:shadow-md hover:-translate-y-1 transition duration-200">
+                <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-extrabold mb-5">
+                    {icon}
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">{title}</h2>
+                <p className="text-gray-600 leading-relaxed flex-grow">{description}</p>
+                <div className="mt-6 text-teal-700 font-semibold">Open calculator →</div>
             </div>
         </Link>
     );
@@ -641,6 +645,8 @@ function App() {
                         <Route path="/services" element={<ServicesPage />} />
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/calculators" element={<CalculatorsPage />} />
+                        <Route path="/calculators/gst" element={<GSTCalculatorPage />} />
+                        <Route path="/calculators/income-tax" element={<IncomeTaxCalculatorPage />} />
                         <Route path="/calculators/tds" element={<TDSCalculatorPage />} />
                         <Route path="/calculators/gst-applicability" element={<GSTApplicabilityCalculatorPage />} />
                         <Route path="/calculators/itc-availment" element={<ITCAvailmentCalculatorPage />} />
