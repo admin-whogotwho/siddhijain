@@ -5,6 +5,7 @@ const money = (value) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Math.max(0, value || 0));
 
 const number = (value) => Math.max(0, Number(value) || 0);
+const signedNumber = (value) => Number(value) || 0;
 
 const Input = ({ label, value, onChange, hint }) => (
   <div>
@@ -89,9 +90,13 @@ function calculate(income, regime, age, resident, oldDeductions) {
   const surcharge = surchargeRate(taxableIncome, regime);
 
   // New-regime marginal relief around ₹12 lakh.
-  if (regime === 'new' && taxableIncome > 1200000 && taxableIncome <= 1300000) {
+  if (regime === 'new' && taxableIncome > 1200000) {
+    const excessIncome = taxableIncome - 1200000;
     const taxAt12L = slabTax(1200000, newSlabs);
-    taxAfterRebate = Math.min(taxAfterRebate, taxAt12L + (taxableIncome - 1200000));
+    const marginalReliefLimit = taxAt12L / 0.85;
+    if (excessIncome < marginalReliefLimit) {
+      taxAfterRebate = Math.min(taxAfterRebate, taxAt12L + excessIncome);
+    }
   }
 
   let taxWithSurcharge = taxAfterRebate * (1 + surcharge);
@@ -135,7 +140,7 @@ export default function IncomeTaxCalculatorPage() {
   const [resident, setResident] = useState(true);
 
   const grossIncome = useMemo(
-    () => number(salary) + Number(houseProperty || 0) + number(business) + number(otherIncome),
+    () => number(salary) + signedNumber(houseProperty) + signedNumber(business) + number(otherIncome),
     [salary, houseProperty, business, otherIncome]
   );
 
@@ -175,8 +180,8 @@ export default function IncomeTaxCalculatorPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-5">1. Enter your income</h2>
               <div className="grid md:grid-cols-2 gap-5">
                 <Input label="Salary / pension income (₹)" value={salary} onChange={setSalary} hint="Enter gross salary/pension before standard deduction." />
-                <Input label="Income / loss from house property (₹)" value={houseProperty} onChange={setHouseProperty} hint="Enter the computed income or allowable loss for this estimate." />
-                <Input label="Business / profession income (₹)" value={business} onChange={setBusiness} />
+                <SignedInput label="Income / loss from house property (₹)" value={houseProperty} onChange={setHouseProperty} hint="Enter the computed income or allowable loss for this estimate." />
+                <SignedInput label="Business / profession income (₹)" value={business} onChange={setBusiness} hint="You may enter a business/profession loss as a negative amount." />
                 <Input label="Other normal-rate income (₹)" value={otherIncome} onChange={setOtherIncome} hint="For example, interest. Do not use this for special-rate capital gains or lottery income." />
               </div>
 
@@ -245,6 +250,23 @@ export default function IncomeTaxCalculatorPage() {
   );
 }
 
+function SignedInput({ label, value, onChange, hint }) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
+      <input
+        type="number"
+        step="1000"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="0"
+        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+      />
+      {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
 function TaxCard({ title, subtitle, result, featured }) {
   return (
     <div className={`rounded-2xl p-6 shadow-sm border ${featured ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-gray-900 border-gray-200'}`}>
@@ -260,7 +282,7 @@ function TaxCard({ title, subtitle, result, featured }) {
         <Row label="Standard deduction" value={money(result.standardDeduction)} muted={featured} />
         {result.deductions > 0 && <Row label="Other deductions" value={money(result.deductions)} muted={featured} />}
         <Row label="Income tax before rebate" value={money(result.baseTax)} muted={featured} />
-        <Row label="Rebate u/s 87A" value={money(result.rebate)} muted={featured} />
+        <Row label={title.startsWith("Old") ? "Rebate u/s 87A" : "Rebate" } value={money(result.rebate)} muted={featured} />
         <Row label="Surcharge" value={money(result.surchargeAmount)} muted={featured} />
         <Row label="Health & Education Cess" value={money(result.cess)} muted={featured} />
       </div>
