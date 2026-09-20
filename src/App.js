@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient'; // Import the configured Supabase client
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom'; // Import routing components
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Import routing components
 
 // --- Page Components ---
 // Import all page components
@@ -538,7 +538,6 @@ function App() {
     // but kept for potential hash-based scrolling on home page and mobile menu state management.
     const [activeSection, setActiveSection] = useState('home');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const navigate = useNavigate();
 
     // The useEffect for hash change is now less critical since primary navigation is via Router Link/navigate
     // but can be kept for direct hash links or initial load behavior if desired.
