@@ -17,6 +17,10 @@ import GSTApplicabilityCalculatorPage from './pages/GSTApplicabilityCalculatorPa
 import ITCAvailmentCalculatorPage from './pages/ITCAvailmentCalculatorPage';
 import GSTCalculatorPage from './pages/GSTCalculatorPage';
 import IncomeTaxCalculatorPage from './pages/IncomeTaxCalculatorPage';
+import GSTPlaceOfSupplyPage from './pages/GSTPlaceOfSupplyPage';
+import GSTImportCalculatorPage from './pages/GSTImportCalculatorPage';
+import GSTExportCalculatorPage from './pages/GSTExportCalculatorPage';
+import GSTBlockedITCPage from './pages/GSTBlockedITCPage';
 
 // Home Page Component
 const HomePage = () => { // Removed setActiveSection prop as it's not directly used for scrolling now
@@ -505,12 +509,17 @@ const CalculatorsPage = () => {
                         link="/calculators/gst"
                         icon="GST"
                     />
+                    <CalculatorLinkCard title="Place of Supply" description="Common goods and services place-of-supply rules under IGST Act sections 10, 12 and 13." link="/calculators/gst-place-of-supply" icon="POS" />
+                    <CalculatorLinkCard title="GST Import" description="Estimate BCD, SWS and IGST on imports." link="/calculators/gst-import" icon="IMP" />
+                    <CalculatorLinkCard title="GST Export & Refund" description="Compare LUT and payment-of-IGST routes and estimate the relevant refund." link="/calculators/gst-export" icon="EXP" />
+                    <CalculatorLinkCard title="Blocked ITC" description="Check common section 17(5) blocked-credit categories and exceptions." link="/calculators/gst-blocked-itc" icon="ITC" />
                     <CalculatorLinkCard
                         title="Income Tax Calculator"
                         description="Estimate individual income tax for Tax Year 2026-27 and compare it with the old regime for AY 2026-27."
                         link="/calculators/income-tax"
                         icon="IT"
                     />
+                    <CalculatorLinkCard title="TDS Calculator" description="Enter an expenditure and amount to see indicative TDS, old section and new Income-tax Act 2025 section." link="/calculators/tds" icon="TDS" />
                 </div>
 
                 <div className="max-w-5xl mx-auto mt-8 bg-white border border-gray-200 rounded-2xl p-5 text-sm text-gray-600">
@@ -646,6 +655,10 @@ function App() {
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/calculators" element={<CalculatorsPage />} />
                         <Route path="/calculators/gst" element={<GSTCalculatorPage />} />
+                        <Route path="/calculators/gst-place-of-supply" element={<GSTPlaceOfSupplyPage />} />
+                        <Route path="/calculators/gst-import" element={<GSTImportCalculatorPage />} />
+                        <Route path="/calculators/gst-export" element={<GSTExportCalculatorPage />} />
+                        <Route path="/calculators/gst-blocked-itc" element={<GSTBlockedITCPage />} />
                         <Route path="/calculators/income-tax" element={<IncomeTaxCalculatorPage />} />
                         <Route path="/calculators/tds" element={<TDSCalculatorPage />} />
                         <Route path="/calculators/gst-applicability" element={<GSTApplicabilityCalculatorPage />} />
