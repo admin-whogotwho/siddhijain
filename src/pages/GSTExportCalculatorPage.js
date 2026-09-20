@@ -16,7 +16,7 @@ export default function GSTExportCalculatorPage(){
    const v=num(value), credit=num(itc), at=num(adjustedTurnover)||v, igst=num(igstPaid);
    const estimatedRefund=at ? Math.min(credit, (v*credit)/at) : 0;
    return {igst,estimatedRefund};
- },[value,itc,method,eligibleTurnover,adjustedTurnover,taxRate]);
+ },[value,itc,method,adjustedTurnover,igstPaid]);
  return <><Helmet><title>GST Export Calculator | Zero Rated Supply, LUT & IGST Refund</title><meta name="description" content="GST export calculator for zero-rated supplies, LUT without payment of IGST, IGST payment route and indicative refund calculations."/><link rel="canonical" href="https://www.cssiddhijain.com/calculators/gst-export"/></Helmet>
  <main className="min-h-screen bg-slate-50 py-10 px-4"><div className="max-w-6xl mx-auto">
  <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">GST Technical Tool</p><h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">GST Export & Refund Calculator</h1>
