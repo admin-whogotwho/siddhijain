@@ -16,7 +16,7 @@ const items=[
  {id:'k',section:'17(5)(i)',name:'Tax paid under specified demand provisions',note:'ITC is blocked for tax paid pursuant to specified demand provisions under the CGST Act, including the provisions referred to in section 17(5)(i).'}
 ];
 export default function GSTBlockedITCPage(){
- const [category,setCategory]=useState('all'); const [amount,setAmount]=useState(''); const [selected,setSelected]=useState('c');
+ const [amount,setAmount]=useState(''); const [selected,setSelected]=useState('c');
  const result=useMemo(()=>items.find(x=>x.id===selected)||items[0],[selected]);
  return <><Helmet><title>GST Blocked ITC Calculator | Section 17(5) CGST Act</title><meta name="description" content="GST blocked input tax credit decision tool covering section 17(5) CGST Act categories, common exceptions and indicative ineligible ITC."/><link rel="canonical" href="https://www.cssiddhijain.com/calculators/gst-blocked-itc"/></Helmet>
  <main className="min-h-screen bg-slate-50 py-10 px-4"><div className="max-w-6xl mx-auto"><p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">GST Technical Tool</p><h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Blocked ITC — Section 17(5)</h1><p className="text-gray-600 mt-3 max-w-4xl">Select the nature of the expenditure and see the relevant blocked-credit provision, common statutory exceptions and an indicative amount of ITC that may be ineligible.</p>
