@@ -10,13 +10,11 @@ export default function GSTExportCalculatorPage(){
  const [value,setValue]=useState('');
  const [itc,setItc]=useState('');
  const [method,setMethod]=useState('lut');
- const [eligibleTurnover,setEligibleTurnover]=useState('');
  const [adjustedTurnover,setAdjustedTurnover]=useState('');
- const [taxRate,setTaxRate]=useState('18');
+ const [igstPaid,setIgstPaid]=useState('');
  const result=useMemo(()=>{
-   const v=num(value), credit=num(itc), rate=num(taxRate), et=num(eligibleTurnover)||v, at=num(adjustedTurnover)||v;
-   const igst=v*rate/100;
-   const estimatedRefund=Math.min(credit, et ? credit*at/et : 0);
+   const v=num(value), credit=num(itc), at=num(adjustedTurnover)||v, igst=num(igstPaid);
+   const estimatedRefund=at ? Math.min(credit, (v*credit)/at) : 0;
    return {igst,estimatedRefund};
  },[value,itc,method,eligibleTurnover,adjustedTurnover,taxRate]);
  return <><Helmet><title>GST Export Calculator | Zero Rated Supply, LUT & IGST Refund</title><meta name="description" content="GST export calculator for zero-rated supplies, LUT without payment of IGST, IGST payment route and indicative refund calculations."/><link rel="canonical" href="https://www.cssiddhijain.com/calculators/gst-export"/></Helmet>
@@ -28,15 +26,14 @@ export default function GSTExportCalculatorPage(){
  <Field label="Export / zero-rated turnover (₹)"><input className={cls} type="number" min="0" value={value} onChange={e=>setValue(e.target.value)} placeholder="e.g. 5000000"/></Field>
  <Field label="Eligible accumulated ITC (₹)" hint="Enter only ITC eligible for refund, not blocked/ineligible credit."><input className={cls} type="number" min="0" value={itc} onChange={e=>setItc(e.target.value)} placeholder="e.g. 600000"/></Field>
  <Field label="Export route"><div className="grid grid-cols-2 gap-2">{[['lut','LUT / without IGST'],['igst','Pay IGST']].map(([v,l])=><button type="button" key={v} onClick={()=>setMethod(v)} className={`rounded-xl px-4 py-3 border text-sm font-semibold ${method===v?'bg-teal-600 text-white border-teal-600':'bg-white border-gray-200 text-gray-700'}`}>{l}</button>)}</div></Field>
- <Field label="Indicative IGST rate (%)" hint="Used only for the payment-of-IGST illustration."><input className={cls} type="number" min="0" step="0.01" value={taxRate} onChange={e=>setTaxRate(e.target.value)}/></Field>
- <Field label="Adjusted total turnover (₹)" hint="Optional input for an indicative Rule 89(4) style ratio."><input className={cls} type="number" min="0" value={adjustedTurnover} onChange={e=>setAdjustedTurnover(e.target.value)} placeholder="Use export value if left blank"/></Field>
- <Field label="Eligible zero-rated turnover (₹)" hint="Optional denominator input for an indicative refund ratio."><input className={cls} type="number" min="0" value={eligibleTurnover} onChange={e=>setEligibleTurnover(e.target.value)} placeholder="Use export value if left blank"/></Field>
+ <Field label="Adjusted total turnover (₹)" hint="Used as the denominator for the indicative Rule 89(4) formula."><input className={cls} type="number" min="0" value={adjustedTurnover} onChange={e=>setAdjustedTurnover(e.target.value)} placeholder="Enter adjusted total turnover"/></Field>
+ <Field label="IGST actually paid on zero-rated supply (₹)" hint="For the payment-of-IGST route."><input className={cls} type="number" min="0" value={igstPaid} onChange={e=>setIgstPaid(e.target.value)} placeholder="e.g. 900000"/></Field>
  </div></section>
  <section className="lg:col-span-2 bg-slate-900 text-white rounded-2xl p-6 md:p-8"><p className="text-sm text-slate-300">{method==='lut'?'Indicative ITC refund':'Indicative IGST on export'}</p><div className="text-4xl font-bold mt-2">{money(method==='lut'?result.estimatedRefund:result.igst)}</div>
- <div className="border-t border-slate-700 my-6"/><div className="space-y-3 text-sm"><Row label="Export value" value={money(num(value))}/><Row label="Eligible ITC entered" value={money(num(itc))}/><Row label="Selected route" value={method==='lut'?'LUT':'Payment of IGST'}/></div>
+ <div className="border-t border-slate-700 my-6"/><div className="space-y-3 text-sm"><Row label="Export value" value={money(num(value))}/><Row label="Net ITC entered" value={money(num(itc))}/><Row label="Adjusted total turnover" value={money(num(adjustedTurnover)||num(value))}/><Row label="Selected route" value={method==='lut'?'LUT':'Payment of IGST'}/></div>
  <div className="mt-6 rounded-xl bg-slate-800 p-4 text-xs text-slate-300 leading-relaxed">{method==='lut'?'The actual refund is governed by the statutory formula, eligibility, documentary conditions and Rule 89 requirements.':'The actual IGST payment/refund depends on eligibility, invoice/shipping-bill data and the applicable law and notifications.'}</div></section>
  </div>
- <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-5 text-sm text-gray-600"><strong className="text-gray-800">Important:</strong> This is an indicative export/refund tool. It does not determine export of services conditions, realisation in convertible foreign exchange, intermediary issues, SEZ documentation, shipping-bill matching, Rule 96 restrictions, or the full Rule 89 refund formula.</div>
+ <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-5 text-sm text-gray-600"><strong className="text-gray-800">Important:</strong> This is an indicative export/refund tool. The LUT result uses the core Rule 89(4) ratio of zero-rated turnover × Net ITC ÷ adjusted total turnover; the actual claim is subject to the statutory definition of Net ITC, exclusions, caps, documentary conditions and applicable rules. The payment route uses the IGST actually paid. It does not determine export-of-services conditions, realisation, intermediary issues, SEZ documentation or Rule 96 restrictions.</div>
  </div></main></>;
 }
 function Row({label,value}){return <div className="flex justify-between gap-4"><span className="text-slate-300">{label}</span><strong>{value}</strong></div>}
