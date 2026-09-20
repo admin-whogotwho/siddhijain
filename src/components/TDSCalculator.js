@@ -1,6 +1,6 @@
 // src/components/TDSCalculator.js
 
-import React, { useState, useEffect } from 'react'; // <--- IMPORTANT: Include this line!
+import React, { useState } from 'react';
 // import { supabase } from '../supabaseClient'; // Only needed if you had actual Supabase integration for searchCaseLaws
 
 // Your TDS Calculator code starts here:
