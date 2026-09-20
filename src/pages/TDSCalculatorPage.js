@@ -8,7 +8,7 @@ const payments = [
  {id:'194M',name:'Individual/HUF: work / professional / commission',old:'194M',neo:'393(1) Table 6(ii)',rate:2,threshold:5000000,note:'For an individual/HUF payer covered by this provision; aggregate threshold ₹50 lakh.'},
  {id:'professional',name:'Professional / technical fees / royalty / director fees',old:'194J',neo:'393(1) Table 6(iii)',rate:10,threshold:50000,note:'2% applies to specified technical fees/certain royalty; 10% to other covered professional/director/royalty payments.'},
  {id:'commission',name:'Commission / brokerage',old:'194H',neo:'393(1) Table 1(ii)',rate:2,threshold:20000,note:'Common resident commission/brokerage provision.'},
- {id:'insurance',name:'Insurance commission',old:'194D',neo:'393(1) Table 1(i)',rate:10,threshold:20000,note:'Rate is subject to the rate-in-force rules.'},
+ {id:'insurance',name:'Insurance commission',old:'194D',neo:'393(1) Table 1(i)',rate:2,threshold:20000,note:'Rate is subject to the rate-in-force rules.'},
  {id:'interest',name:'Interest other than securities',old:'194A',neo:'393(1) Table 5',rate:10,threshold:10000,note:'Threshold varies by payer/payee category, including banking-company and senior-citizen cases.'},
  {id:'rentIB',name:'Rent by individual/HUF not covered by 194-I',old:'194IB',neo:'393(1) Table 2(i)',rate:2,threshold:50000,note:'Rent threshold is ₹50,000 for a month or part of a month.'},
  {id:'rentPlant',name:'Rent — machinery / plant / equipment',old:'194-I',neo:'393(1) Table 2(ii)',rate:2,threshold:50000,note:'2% for machinery, plant or equipment under the new table.'},
