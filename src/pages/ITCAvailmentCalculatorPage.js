@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import ITCAvailmentCalculator from '../components/ITCAvailmentCalculator'; // Import the ITC Availment Calculator component
+import ITCAvailmentCalculator from '../components/ITCAvailmentCalculator';
 
 const ITCAvailmentCalculatorPage = () => {
   return (
@@ -10,10 +10,13 @@ const ITCAvailmentCalculatorPage = () => {
       <Helmet>
         <title>ITC Availment Calculator Online | Input Tax Credit Eligibility - Siddhi Jain & Associates</title>
         <meta name="description" content="Check your Input Tax Credit (ITC) eligibility under GST with our free online calculator. Understand blocked credits and general conditions for ITC availment." />
-        <link rel="canonical" href="https://www.cssiddhijain.com/itc-availment-calculator" /> {/* IMPORTANT: Replace with your actual live domain and specific calculator URL */}
+        <link rel="canonical" href="https://www.cssiddhijain.com/calculators/itc-availment" />
+        <meta property="og:title" content="ITC Availment Calculator Online | Siddhi Jain & Associates" />
+        <meta property="og:description" content="Free online ITC calculator to understand common Input Tax Credit eligibility and blocked credit scenarios." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.cssiddhijain.com/calculators/itc-availment" />
       </Helmet>
 
-      {/* Hero section or banner for the specific calculator page */}
       <section className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-16 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 animate-fade-in-up">ITC Availment Calculator</h1>
         <p className="text-xl opacity-90 animate-fade-in-up animation-delay-200">
@@ -21,14 +24,12 @@ const ITCAvailmentCalculatorPage = () => {
         </p>
       </section>
 
-      {/* Main content area for the calculator */}
       <section className="py-12 px-4 md:px-8 lg:px-16 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <ITCAvailmentCalculator /> {/* Render the actual ITC Availment Calculator component */}
+          <ITCAvailmentCalculator />
         </div>
       </section>
 
-      {/* Optional: Add more content related to ITC Availment here, e.g., FAQs, articles */}
       <section className="py-12 px-4 md:px-8 lg:px-16 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Understanding Input Tax Credit (ITC)</h2>
