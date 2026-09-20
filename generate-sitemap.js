@@ -9,6 +9,8 @@ const urls = [
   { url: '/about', changefreq: 'monthly', priority: 0.7 },
   { url: '/services', changefreq: 'monthly', priority: 0.9 },
   { url: '/calculators', changefreq: 'monthly', priority: 0.8 },
+  { url: '/calculators/gst', changefreq: 'monthly', priority: 0.9 },
+  { url: '/calculators/income-tax', changefreq: 'monthly', priority: 0.9 },
   { url: '/calculators/tds', changefreq: 'monthly', priority: 0.8 },
   { url: '/calculators/gst-applicability', changefreq: 'monthly', priority: 0.8 },
   { url: '/calculators/itc-availment', changefreq: 'monthly', priority: 0.8 },
