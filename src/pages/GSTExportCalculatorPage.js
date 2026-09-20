@@ -22,7 +22,7 @@ export default function GSTExportCalculatorPage(){
  return <><Helmet><title>GST Export Calculator | Zero Rated Supply, LUT & IGST Refund</title><meta name="description" content="GST export calculator for zero-rated supplies, LUT without payment of IGST, IGST payment route and indicative refund calculations."/><link rel="canonical" href="https://www.cssiddhijain.com/calculators/gst-export"/></Helmet>
  <main className="min-h-screen bg-slate-50 py-10 px-4"><div className="max-w-6xl mx-auto">
  <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">GST Technical Tool</p><h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">GST Export & Refund Calculator</h1>
- <p className="text-gray-600 mt-3 max-w-4xl">Exports and supplies to SEZ are zero-rated supplies under section 16 of the IGST Act. The exporter can generally use the LUT/bond route and seek refund of eligible accumulated ITC, or the payment-of-IGST route where permitted. citeturn1search3turn1search0</p>
+ <p className="text-gray-600 mt-3 max-w-4xl">Exports and supplies to SEZ are zero-rated supplies under section 16 of the IGST Act. The exporter can generally use the LUT/bond route and seek refund of eligible accumulated ITC, or the payment-of-IGST route where permitted.</p>
  <div className="grid lg:grid-cols-5 gap-6 mt-8">
  <section className="lg:col-span-3 bg-white rounded-2xl border border-gray-200 p-6 md:p-8"><div className="grid md:grid-cols-2 gap-5">
  <Field label="Export / zero-rated turnover (₹)"><input className={cls} type="number" min="0" value={value} onChange={e=>setValue(e.target.value)} placeholder="e.g. 5000000"/></Field>
