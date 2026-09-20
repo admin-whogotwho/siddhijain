@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import TDSCalculator from '../components/TDSCalculator'; // Import the TDS Calculator component
+import TDSCalculator from '../components/TDSCalculator';
 
 const TDSCalculatorPage = () => {
   return (
@@ -10,10 +10,13 @@ const TDSCalculatorPage = () => {
       <Helmet>
         <title>TDS Calculator Online | Calculate TDS Easily - Siddhi Jain & Associates</title>
         <meta name="description" content="Use our free online TDS Calculator to quickly determine Tax Deducted at Source for various payments like rent, professional fees, and contracts. Accurate and easy-to-use." />
-        <link rel="canonical" href="https://www.cssiddhijain.com/tds-calculator" /> {/* IMPORTANT: Replace with your actual live domain and specific calculator URL */}
+        <link rel="canonical" href="https://www.cssiddhijain.com/calculators/tds" />
+        <meta property="og:title" content="TDS Calculator Online | Siddhi Jain & Associates" />
+        <meta property="og:description" content="Free online TDS Calculator for common payments and TDS calculations." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.cssiddhijain.com/calculators/tds" />
       </Helmet>
 
-      {/* Hero section or banner for the specific calculator page */}
       <section className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white py-16 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 animate-fade-in-up">TDS Calculator</h1>
         <p className="text-xl opacity-90 animate-fade-in-up animation-delay-200">
@@ -21,14 +24,12 @@ const TDSCalculatorPage = () => {
         </p>
       </section>
 
-      {/* Main content area for the calculator */}
       <section className="py-12 px-4 md:px-8 lg:px-16 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <TDSCalculator /> {/* Render the actual TDS Calculator component */}
+          <TDSCalculator />
         </div>
       </section>
 
-      {/* Optional: Add more content related to TDS here, e.g., FAQs, articles */}
       <section className="py-12 px-4 md:px-8 lg:px-16 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Understanding TDS</h2>
