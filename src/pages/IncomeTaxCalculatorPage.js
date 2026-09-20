@@ -89,13 +89,11 @@ function calculate(income, regime, age, resident, oldDeductions) {
   let taxAfterRebate = Math.max(0, baseTax - rebate);
   const surcharge = surchargeRate(taxableIncome, regime);
 
-  // New-regime marginal relief around ₹12 lakh.
-  if (regime === 'new' && taxableIncome > 1200000) {
+  // New-regime marginal relief above ₹12 lakh is available to resident individuals.
+  if (regime === 'new' && resident && taxableIncome > 1200000) {
     const excessIncome = taxableIncome - 1200000;
-    const taxAt12L = slabTax(1200000, newSlabs);
-    const marginalReliefLimit = taxAt12L / 0.85;
-    if (excessIncome < marginalReliefLimit) {
-      taxAfterRebate = Math.min(taxAfterRebate, taxAt12L + excessIncome);
+    if (taxAfterRebate > excessIncome) {
+      taxAfterRebate = excessIncome;
     }
   }
 
